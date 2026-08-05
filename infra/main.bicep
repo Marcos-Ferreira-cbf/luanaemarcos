@@ -128,7 +128,9 @@ resource liberaAzure 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@20
   }
 }
 
-var urlBanco = 'postgresql://${usuarioBanco}:${senhaBanco}@${banco.properties.fullyQualifiedDomainName}/casamento?sslmode=require'
+// verify-full, e não require: o driver pg vai mudar a semântica de 'require'
+// para a do libpq (que aceita certificado não verificado) na versão 9.
+var urlBanco = 'postgresql://${usuarioBanco}:${senhaBanco}@${banco.properties.fullyQualifiedDomainName}/casamento?sslmode=verify-full'
 
 resource ambiente 'Microsoft.App/managedEnvironments@2024-03-01' = if (implantarApp) {
   name: 'cae-${prefixo}'

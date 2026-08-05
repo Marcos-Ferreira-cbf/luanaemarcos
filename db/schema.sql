@@ -14,7 +14,8 @@
 -- psql "$DATABASE_URL" -f db/schema.sql
 -- =====================================================================
 
-create extension if not exists pgcrypto;
+-- gen_random_uuid() é nativa desde o Postgres 13, sem extensão nenhuma.
+-- O Azure não permite pgcrypto no allow-list padrão, e aqui não faz falta.
 
 -- ---------------------------------------------------------------------
 -- Convites
