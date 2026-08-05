@@ -1,8 +1,10 @@
-/*
- * Tokens tirados das próprias fotos do ensaio: areia, brancos lavados de sol
- * e o azul-ardósia dos costões. Nenhuma cor decorativa entra na página —
- * a cor vem das imagens e a interface fica em silêncio.
- */
+/* =====================================================================
+   Marcos & Luana — folha única
+   Portada do protótipo. As famílias tipográficas chegam pelo next/font
+   (auto-hospedadas), não pelo CDN do Google: menos uma requisição a um
+   terceiro e nenhum flash de fonte trocando no meio da rolagem.
+   ===================================================================== */
+
 :root {
   --luz: #faf8f5;
   --areia: #ede6dd;
@@ -10,41 +12,682 @@
   --onda: #55707b;
   --tinta: #1f2a2f;
 
-  --serif: "Instrument Serif", Georgia, serif;
-  --sans: "Instrument Sans", system-ui, sans-serif;
-  --mono: "DM Mono", ui-monospace, monospace;
+  --serif: var(--fonte-serif), Georgia, serif;
+  --sans: var(--fonte-sans), system-ui, sans-serif;
+  --mono: var(--fonte-mono), ui-monospace, monospace;
 
-  --toque: 52px; /* alvo mínimo de toque */
+  --toque: 52px;
   --ar: clamp(4rem, 13vw, 7rem);
   --marg: clamp(1.5rem, 6vw, 2.5rem);
 }
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 body {
-  margin: 0;
   background: var(--luz);
   color: var(--tinta);
   font-family: var(--sans);
   font-size: 17px;
-  line-height: 1.6;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
 }
 
-:is(a, button, input, [tabindex]):focus-visible {
-  outline: 2px solid var(--mare);
-  outline-offset: 3px;
+img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
+.col {
+  width: min(100% - var(--marg) * 2, 620px);
+  margin-inline: auto;
+}
+
+.rotulo {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--onda);
+}
+
+.serifa {
+  font-family: var(--serif);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+}
+
+/* ============ capa ============ */
+.capa {
+  position: relative;
+  height: 100svh;
+  min-height: 600px;
+  overflow: hidden;
+}
+.capa__foto {
+  position: absolute;
+  inset: 0;
+}
+.capa__foto img {
+  animation: respira 20s ease-out forwards;
+}
+@keyframes respira {
+  from {
+    transform: scale(1.06);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+.capa__veu {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(31, 42, 47, 0.28) 0%,
+    rgba(31, 42, 47, 0) 32%,
+    rgba(31, 42, 47, 0.55) 100%
+  );
+}
+.capa__texto {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 0 var(--marg) clamp(2.5rem, 9vw, 4.5rem);
+  color: #fff;
+  text-align: center;
+}
+.capa__rotulo {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+}
+.capa__nomes {
+  font-size: clamp(3.4rem, 18vw, 6.5rem);
+  margin: 0.35em 0 0.25em;
+  text-shadow: 0 1px 30px rgba(31, 42, 47, 0.25);
+}
+.capa__nomes em {
+  font-style: italic;
+  opacity: 0.8;
+  font-size: 0.55em;
+  vertical-align: 0.08em;
+}
+.capa__falta {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ============ blocos ============ */
+.bloco {
+  padding: var(--ar) 0;
+}
+.bloco--areia {
+  background: var(--areia);
+}
+.bloco--escuro {
+  background: var(--mare);
+  color: var(--luz);
+}
+.bloco--escuro .rotulo {
+  color: rgba(250, 248, 245, 0.6);
+}
+
+.titulo {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 9vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0.5rem 0 1.2rem;
+}
+.texto {
+  font-size: 1.05rem;
+  max-width: 38ch;
+  color: color-mix(in srgb, var(--tinta) 82%, transparent);
+}
+.bloco--escuro .texto {
+  color: rgba(250, 248, 245, 0.78);
+}
+
+/* ============ versículo ============ */
+.verso {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid color-mix(in srgb, var(--tinta) 12%, transparent);
+}
+.verso__texto {
+  font-size: clamp(1.35rem, 5.5vw, 1.7rem);
+  font-style: italic;
+  line-height: 1.35;
+  color: var(--tinta);
+}
+.verso__ref {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--onda);
+  margin-top: 1rem;
+}
+
+/* ============ faixa de foto ============ */
+.faixa {
+  position: relative;
+  height: clamp(240px, 52vw, 420px);
+  overflow: hidden;
+}
+
+/* ============ o dia ============ */
+.linha {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 1.2rem;
+  padding: 1.2rem 0;
+  border-top: 1px solid color-mix(in srgb, var(--tinta) 12%, transparent);
+  align-items: baseline;
+}
+.linha:last-of-type {
+  border-bottom: 1px solid color-mix(in srgb, var(--tinta) 12%, transparent);
+}
+.linha__val {
+  font-size: 1.1rem;
+}
+.linha__obs {
+  display: block;
+  font-size: 0.95rem;
+  opacity: 0.65;
+  margin-top: 0.15rem;
+}
+
+/* ============ botões ============ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: var(--toque);
+  width: 100%;
+  padding: 0.9rem 1.8rem;
+  font-family: var(--sans);
+  font-size: 1.02rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.15s ease, transform 0.12s ease;
+}
+.btn:active {
+  transform: scale(0.985);
+}
+.btn:focus-visible {
+  outline: 2px solid var(--onda);
+  outline-offset: 3px;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn--cheio {
+  background: var(--mare);
+  color: var(--luz);
+}
+.btn--claro {
+  background: var(--luz);
+  color: var(--mare);
+}
+.btn--linha {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--tinta) 25%, transparent);
+  color: var(--tinta);
+}
+.bloco--escuro .btn--linha {
+  border-color: rgba(250, 248, 245, 0.3);
+  color: var(--luz);
+}
+
+/* ============ confirmar ============ */
+.campo {
+  width: 100%;
+  min-height: var(--toque);
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  font-family: var(--mono);
+  font-size: 1.35rem;
+  text-align: center;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--luz);
+  border: 1px solid rgba(250, 248, 245, 0.3);
+  border-radius: 4px;
+}
+.campo::placeholder {
+  color: rgba(250, 248, 245, 0.35);
+}
+.campo:focus-visible {
+  outline: 2px solid var(--luz);
+  outline-offset: 2px;
+}
+
+/* ============ presentes ============ */
+.lista {
+  margin-top: 2rem;
+}
+.item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+  width: 100%;
+  padding: 1.35rem 0;
+  text-align: left;
+  background: none;
+  border: none;
+  border-top: 1px solid color-mix(in srgb, var(--tinta) 12%, transparent);
+  font-family: var(--sans);
+  cursor: pointer;
+  transition: padding-left 0.18s ease;
+}
+.item:last-child {
+  border-bottom: 1px solid color-mix(in srgb, var(--tinta) 12%, transparent);
+}
+.item:hover:not(:disabled) {
+  padding-left: 0.5rem;
+}
+.item:focus-visible {
+  outline: 2px solid var(--onda);
+  outline-offset: 2px;
+}
+.item:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+.item__nome {
+  font-size: 1.15rem;
+  color: var(--tinta);
+}
+.item__resta {
+  display: block;
+  font-size: 0.85rem;
+  opacity: 0.55;
+  margin-top: 0.15rem;
+}
+.item__valor {
+  font-family: var(--mono);
+  font-size: 1rem;
+  white-space: nowrap;
+  color: var(--onda);
+}
+
+.grupo {
+  margin-top: 2.6rem;
+}
+.grupo:first-of-type {
+  margin-top: 2rem;
+}
+.grupo__nome {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--onda);
+  margin-bottom: 0.2rem;
+}
+.aviso {
+  margin-top: 2.2rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid color-mix(in srgb, var(--tinta) 12%, transparent);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--tinta) 62%, transparent);
+  max-width: 44ch;
+}
+
+/* ============ gravata: a maré ============ */
+.gravata {
+  position: relative;
+  overflow: hidden;
+}
+.gravata__fundo {
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+}
+.gravata__fundo img {
+  filter: grayscale(1);
+}
+.gravata__conteudo {
+  position: relative;
+}
+
+.mare {
+  margin: 2.4rem 0 1.6rem;
+}
+.mare__num {
+  font-family: var(--serif);
+  font-size: clamp(3rem, 13vw, 4.2rem);
+  line-height: 1;
+  color: var(--luz);
+}
+.mare__de {
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  color: rgba(250, 248, 245, 0.6);
+  margin-top: 0.5rem;
+}
+.mare__trilho {
+  position: relative;
+  height: 1px;
+  margin-top: 1.6rem;
+  background: rgba(250, 248, 245, 0.25);
+}
+.mare__nivel {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: var(--luz);
+  transition: width 1.6s cubic-bezier(0.22, 0.9, 0.3, 1);
+}
+.mare__nivel::after {
+  content: "";
+  position: absolute;
+  right: -3px;
+  top: -3px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--luz);
+}
+
+.cotas {
+  display: flex;
+  gap: 0.6rem;
+  margin: 1.8rem 0 1rem;
+}
+.cota {
+  flex: 1;
+  min-height: var(--toque);
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  background: transparent;
+  color: var(--luz);
+  border: 1px solid rgba(250, 248, 245, 0.3);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.cota[aria-pressed="true"] {
+  background: var(--luz);
+  color: var(--mare);
+  border-color: var(--luz);
+}
+.cota:focus-visible {
+  outline: 2px solid var(--luz);
+  outline-offset: 2px;
+}
+
+/* ============ galeria ============ */
+.rail {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 0 var(--marg) 0.5rem;
+  scrollbar-width: none;
+}
+.rail::-webkit-scrollbar {
+  display: none;
+}
+.rail__item {
+  position: relative;
+  flex: 0 0 74%;
+  max-width: 340px;
+  aspect-ratio: 2/3;
+  scroll-snap-align: center;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+/* ============ rodapé ============ */
+.rodape {
+  background: var(--mare);
+  color: rgba(250, 248, 245, 0.75);
+  text-align: center;
+  padding: var(--ar) 0 3rem;
+}
+.rodape__nomes {
+  font-family: var(--serif);
+  font-size: 2.2rem;
+  color: var(--luz);
+}
+.rodape__url {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  margin-top: 1.2rem;
+  opacity: 0.6;
+}
+
+/* ============ folha de pagamento ============ */
+.folha {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: var(--luz);
+  overflow-y: auto;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(1.5rem);
+  transition: opacity 0.22s ease, transform 0.28s ease;
+}
+.folha[data-aberta="true"] {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+.folha__topo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0 1rem;
+}
+.folha__voltar {
+  min-width: var(--toque);
+  min-height: var(--toque);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: var(--tinta);
+}
+.folha__item {
+  font-family: var(--serif);
+  font-size: 1.9rem;
+  margin-top: 1rem;
+}
+.folha__valor {
+  font-family: var(--mono);
+  font-size: 1.35rem;
+  color: var(--onda);
+  margin: 0.4rem 0 0.1rem;
+}
+.folha__prazo {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  opacity: 0.55;
+}
+.folha__qr {
+  width: 190px;
+  height: 190px;
+  margin: 2rem auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--tinta) 12%, transparent);
+  border-radius: 4px;
+}
+.folha__qr img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.folha__codigo {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  line-height: 1.5;
+  word-break: break-all;
+  opacity: 0.45;
+  padding: 0.9rem;
+  margin-bottom: 1rem;
+  background: var(--areia);
+  border-radius: 4px;
+}
+.passo {
+  display: flex;
+  gap: 0.9rem;
+  padding: 0.55rem 0;
+  font-size: 0.98rem;
+}
+.passo__n {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--onda);
+  padding-top: 0.15rem;
+}
+
+/* ---- formulário da folha ----
+   O protótipo pulava direto para o QR. A API exige um nome: sem ele o
+   casal recebe o Pix e não sabe de quem. Este passo existe por isso. */
+.folha__campo {
+  width: 100%;
+  min-height: var(--toque);
+  padding: 0.9rem 1rem;
+  margin-bottom: 0.75rem;
+  font-family: var(--sans);
+  font-size: 1rem;
+  color: var(--tinta);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--tinta) 25%, transparent);
+  border-radius: 4px;
+}
+.folha__campo::placeholder {
+  color: color-mix(in srgb, var(--tinta) 40%, transparent);
+}
+.folha__campo:focus-visible {
+  outline: 2px solid var(--onda);
+  outline-offset: 2px;
+}
+textarea.folha__campo {
+  min-height: 5.5rem;
+  resize: vertical;
+  line-height: 1.5;
+}
+.folha__erro {
+  padding: 0.9rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: #8c2f2f;
+  background: #f6e7e4;
+  border-radius: 4px;
+}
+
+/* ============ rsvp ============ */
+.pessoa {
+  padding: 1.4rem 0;
+  border-top: 1px solid rgba(250, 248, 245, 0.16);
+}
+.pessoa:last-of-type {
+  border-bottom: 1px solid rgba(250, 248, 245, 0.16);
+}
+.pessoa__nome {
+  font-size: 1.15rem;
+  color: var(--luz);
+  margin-bottom: 0.8rem;
+}
+.pessoa__opcoes {
+  display: flex;
+  gap: 0.6rem;
+}
+.escolha {
+  flex: 1;
+  min-height: var(--toque);
+  font-family: var(--sans);
+  font-size: 0.98rem;
+  color: var(--luz);
+  background: transparent;
+  border: 1px solid rgba(250, 248, 245, 0.3);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.escolha[aria-pressed="true"] {
+  background: var(--luz);
+  color: var(--mare);
+  border-color: var(--luz);
+}
+.escolha:focus-visible {
+  outline: 2px solid var(--luz);
+  outline-offset: 2px;
+}
+.restricao {
+  width: 100%;
+  min-height: var(--toque);
+  margin-top: 0.7rem;
+  padding: 0.8rem 1rem;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  color: var(--luz);
+  background: transparent;
+  border: 1px solid rgba(250, 248, 245, 0.25);
+  border-radius: 4px;
+}
+.restricao::placeholder {
+  color: rgba(250, 248, 245, 0.35);
+}
+.restricao:focus-visible {
+  outline: 2px solid var(--luz);
+  outline-offset: 2px;
+}
+
+/* revelação suave ao rolar */
+.surge {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.surge[data-visivel="true"] {
+  opacity: 1;
+  transform: none;
+}
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  .surge {
+    opacity: 1;
+    transform: none;
   }
 }
