@@ -37,7 +37,12 @@ param usuarioGhcr string = 'CHANGEME'
 // Os segredos abaixo têm default vazio só para o deploy com implantarApp=false.
 // Quando o app subir, todos precisam vir preenchidos.
 @secure()
-@description('Personal Access Token com escopo read:packages.')
+@description('''
+Personal Access Token com escopo read:packages. Deixe vazio se o pacote no
+GHCR for público — aí o pull é anônimo e não há token nenhum para vazar,
+girar ou esquecer. O repositório já é público; a imagem não carrega segredo
+(tudo entra por env em tempo de execução).
+''')
 param tokenGhcr string = ''
 
 @description('Login administrador do Postgres.')
@@ -63,7 +68,30 @@ param segredoCron string = ''
 @secure()
 param senhaAdmin string = ''
 
+@description('''
+URL pública do app. Vazia = https://<dominio>. No primeiro deploy o DNS
+ainda não aponta para lugar nenhum, então passe aqui o FQDN do próprio
+Container App — é ele que vai no notification_url do Mercado Pago, e um
+webhook apontando para um domínio que não resolve nunca chega.
+''')
+param urlPublica string = ''
+
 var tags = { projeto: 'casamento' }
+
+var urlApp = empty(urlPublica) ? 'https://${dominio}' : urlPublica
+
+// Pacote público no GHCR não precisa de credencial: sem token, sem bloco de
+// registries e sem segredo para manter.
+var segredosApp = concat(
+  [
+    { name: 'database-url', value: urlBanco }
+    { name: 'mp-access-token', value: tokenMp }
+    { name: 'mp-webhook-secret', value: segredoWebhook }
+    { name: 'cron-secret', value: segredoCron }
+    { name: 'admin-senha', value: senhaAdmin }
+  ],
+  empty(tokenGhcr) ? [] : [{ name: 'ghcr-token', value: tokenGhcr }]
+)
 
 // ---------------------------------------------------------------------
 // Logs — 5 GB/mês de ingestão são gratuitos, e este site não chega perto
@@ -166,21 +194,14 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = if (implantarApp) {
         // Certificado gerenciado e domínio customizado não custam nada
         customDomains: []
       }
-      registries: [
+      registries: empty(tokenGhcr) ? [] : [
         {
           server: 'ghcr.io'
           username: usuarioGhcr
           passwordSecretRef: 'ghcr-token'
         }
       ]
-      secrets: [
-        { name: 'ghcr-token', value: tokenGhcr }
-        { name: 'database-url', value: urlBanco }
-        { name: 'mp-access-token', value: tokenMp }
-        { name: 'mp-webhook-secret', value: segredoWebhook }
-        { name: 'cron-secret', value: segredoCron }
-        { name: 'admin-senha', value: senhaAdmin }
-      ]
+      secrets: segredosApp
     }
     template: {
       containers: [
@@ -190,7 +211,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = if (implantarApp) {
           // Menor combinação válida. Next.js roda folgado com isto neste volume.
           resources: { cpu: json('0.25'), memory: '0.5Gi' }
           env: [
-            { name: 'APP_URL', value: 'https://${dominio}' }
+            { name: 'APP_URL', value: urlApp }
             { name: 'NODE_ENV', value: 'production' }
             { name: 'DATABASE_URL', secretRef: 'database-url' }
             { name: 'MP_ACCESS_TOKEN', secretRef: 'mp-access-token' }

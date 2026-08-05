@@ -43,9 +43,16 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      # Na primeira execução o Container App ainda não existe — é justamente
+      # esta imagem que faltava para o Bicep poder criá-lo. Sem o guarda, o
+      # job que publicou a imagem certa terminaria vermelho.
       - name: Nova revisão no Container Apps
         run: |
-          az containerapp update \
-            -g rg-casamento-luanaemarcos \
-            -n ca-casamento \
-            --image ghcr.io/${{ github.repository }}:${{ github.sha }}
+          if az containerapp show -g rg-casamento-luanaemarcos -n ca-casamento -o none 2>/dev/null; then
+            az containerapp update \
+              -g rg-casamento-luanaemarcos \
+              -n ca-casamento \
+              --image ghcr.io/${{ github.repository }}:${{ github.sha }}
+          else
+            echo "::notice::Container App ainda não existe. Imagem publicada; rode o Bicep uma vez com implantarApp=true e imagem=ghcr.io/${{ github.repository }}:${{ github.sha }}"
+          fi
