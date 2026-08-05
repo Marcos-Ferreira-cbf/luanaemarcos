@@ -20,6 +20,24 @@ export type PagamentoMp = {
 };
 
 /**
+ * Para onde o Mercado Pago avisa que o pagamento mudou.
+ *
+ * Sem isto, a entrega dependeria só da URL cadastrada no painel do MP — que
+ * é global, apontava para um domínio que ainda não resolvia, e não dá para
+ * apontar para o app enquanto o DNS não vira. Mandar por pagamento resolve:
+ * cada cobrança carrega o endereço de quem a criou.
+ *
+ * Só vai se for https público: o MP recusa http e recusa localhost, e um
+ * ambiente de desenvolvimento não deve derrubar a criação da cobrança por
+ * causa disso — lá o cron de conciliação já é a rede que segura.
+ */
+function urlDoWebhook(): string | undefined {
+  const base = process.env.APP_URL;
+  if (!base?.startsWith("https://") || base.includes("localhost")) return undefined;
+  return `${base.replace(/\/$/, "")}/api/webhooks/mercadopago`;
+}
+
+/**
  * Cria uma cobrança Pix. A chave de idempotência é o id do pedido: se a rota
  * for chamada duas vezes (clique duplo, retry de rede), o Mercado Pago
  * devolve o mesmo pagamento em vez de criar outro.
@@ -44,6 +62,7 @@ export async function criarPagamentoPix(params: {
       payment_method_id: "pix",
       description: params.descricao,
       external_reference: params.pedidoId,
+      notification_url: urlDoWebhook(),
       date_of_expiration: params.expiraEm.toISOString(),
       payer: {
         email: params.email || "convidado@marcoseluana.social.br",

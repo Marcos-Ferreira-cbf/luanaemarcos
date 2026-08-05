@@ -76,6 +76,14 @@ webhook apontando para um domínio que não resolve nunca chega.
 ''')
 param urlPublica string = ''
 
+@description('''
+Domínios já amarrados ao app. O PUT do Container Apps é total: o que não
+vem aqui é removido, então um deploy com a lista vazia derrubaria o domínio
+e o certificado junto. O subir.ps1 lê os atuais e devolve — o padrão vazio
+só vale para quando o app ainda não existe.
+''')
+param dominiosCustomizados array = []
+
 var tags = { projeto: 'casamento' }
 
 var urlApp = empty(urlPublica) ? 'https://${dominio}' : urlPublica
@@ -192,7 +200,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = if (implantarApp) {
         targetPort: 3000
         allowInsecure: false
         // Certificado gerenciado e domínio customizado não custam nada
-        customDomains: []
+        customDomains: dominiosCustomizados
       }
       registries: empty(tokenGhcr) ? [] : [
         {
