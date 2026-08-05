@@ -21,15 +21,24 @@ param prefixo string = 'casamento'
 param local string = 'brazilsouth'
 param dominio string = 'marcoseluana.social.br'
 
+@description('''
+Cria o Container App. Deixe false no primeiro deploy: sem imagem publicada
+no GHCR, a revisão nunca fica saudável e o deployment falha depois de
+esperar o probe. O banco sobe sozinho e já dá para rodar o schema.
+''')
+param implantarApp bool = true
+
 @description('Imagem no GHCR, ex.: ghcr.io/marcos/casamento:sha-abc123')
 param imagem string = 'ghcr.io/CHANGEME/casamento:latest'
 
 @description('Usuário do GitHub, para o pull do GHCR.')
 param usuarioGhcr string = 'CHANGEME'
 
+// Os segredos abaixo têm default vazio só para o deploy com implantarApp=false.
+// Quando o app subir, todos precisam vir preenchidos.
 @secure()
 @description('Personal Access Token com escopo read:packages.')
-param tokenGhcr string
+param tokenGhcr string = ''
 
 @description('Login administrador do Postgres.')
 param usuarioBanco string = 'casamento'
@@ -39,23 +48,23 @@ param usuarioBanco string = 'casamento'
 param senhaBanco string
 
 @secure()
-param tokenMp string
+param tokenMp string = ''
 
 @description('Public key do Mercado Pago. Vai para o navegador, então não é secure().')
-param chavePublicaMp string
+param chavePublicaMp string = ''
 
 @secure()
-param segredoWebhook string
+param segredoWebhook string = ''
 
 @secure()
-param segredoCron string
+param segredoCron string = ''
 
 var tags = { projeto: 'casamento' }
 
 // ---------------------------------------------------------------------
 // Logs — 5 GB/mês de ingestão são gratuitos, e este site não chega perto
 // ---------------------------------------------------------------------
-resource logs 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
+resource logs 'Microsoft.OperationalInsights/workspaces@2023-09-01' = if (implantarApp) {
   name: 'log-${prefixo}'
   location: local
   tags: tags
@@ -121,7 +130,7 @@ resource liberaAzure 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@20
 
 var urlBanco = 'postgresql://${usuarioBanco}:${senhaBanco}@${banco.properties.fullyQualifiedDomainName}/casamento?sslmode=require'
 
-resource ambiente 'Microsoft.App/managedEnvironments@2024-03-01' = {
+resource ambiente 'Microsoft.App/managedEnvironments@2024-03-01' = if (implantarApp) {
   name: 'cae-${prefixo}'
   location: local
   tags: tags
@@ -136,7 +145,7 @@ resource ambiente 'Microsoft.App/managedEnvironments@2024-03-01' = {
   }
 }
 
-resource app 'Microsoft.App/containerApps@2024-03-01' = {
+resource app 'Microsoft.App/containerApps@2024-03-01' = if (implantarApp) {
   name: 'ca-${prefixo}'
   location: local
   tags: tags
@@ -209,4 +218,5 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
   }
 }
 
-output url string = 'https://${app.properties.configuration.ingress.fqdn}'
+output url string = implantarApp ? 'https://${app.properties.configuration.ingress.fqdn}' : ''
+output hostBanco string = banco.properties.fullyQualifiedDomainName
