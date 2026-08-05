@@ -691,3 +691,141 @@ textarea.folha__campo {
     transform: none;
   }
 }
+
+/* =====================================================================
+   painel (/admin) — não é página de convidado: aqui vale densidade,
+   não respiro. A Luana abre isso no celular entre uma coisa e outra.
+   ===================================================================== */
+.painel {
+  padding: 2rem 0 0;
+}
+.painel__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--areia);
+}
+.painel__sair {
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--onda);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.painel__numeros {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem 1rem;
+  padding: 1.75rem 0;
+  border-bottom: 1px solid var(--areia);
+}
+@media (min-width: 560px) {
+  .painel__numeros {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+.painel__num {
+  font-family: var(--serif);
+  font-size: clamp(1.6rem, 7vw, 2.1rem);
+  line-height: 1.1;
+  margin-bottom: 0.25rem;
+}
+
+.painel__abas {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1.5rem 0 0.5rem;
+}
+.painel__aba {
+  flex: 1;
+  min-height: 44px;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--onda);
+  background: transparent;
+  border: 1px solid var(--areia);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.painel__aba[aria-pressed="true"] {
+  background: var(--mare);
+  border-color: var(--mare);
+  color: var(--luz);
+}
+
+.cartao {
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--areia);
+}
+/* já agradecido sai do caminho, mas continua legível e reversível */
+.cartao[data-feito="true"] {
+  opacity: 0.55;
+}
+.cartao__linha {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.cartao__nome {
+  font-family: var(--serif);
+  font-size: 1.25rem;
+}
+.cartao__valor {
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+.cartao__codigo {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--onda);
+}
+.cartao__presente {
+  font-size: 0.95rem;
+  margin-top: 0.2rem;
+}
+.cartao__recado {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--onda);
+  margin-top: 0.5rem;
+}
+.cartao__meta {
+  font-size: 0.78rem;
+  color: var(--onda);
+  margin-top: 0.4rem;
+}
+.cartao__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+.btn--curto {
+  min-height: 40px;
+  padding: 0 1.1rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
+.cartao__pessoa {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.95rem;
+  padding: 0.35rem 0;
+}
+.cartao__pessoa[data-status="pendente"] {
+  color: var(--onda);
+}
+.cartao__pessoa[data-status="nao_vem"] {
+  text-decoration: line-through;
+  color: var(--onda);
+}

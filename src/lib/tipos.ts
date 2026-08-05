@@ -21,6 +21,43 @@ export type Mare = {
   pessoas: number;
 };
 
+/* ---------------------------------------------------------------- painel */
+
+/** Contadores do topo do painel. Vêm como string do pg (count é bigint). */
+export type Resumo = {
+  arrecadado_centavos: string;
+  pagos: string;
+  pendentes: string;
+  a_agradecer: string;
+  vem: string;
+  nao_vem: string;
+  sem_resposta: string;
+  com_transporte: string;
+};
+
+export type PedidoPago = {
+  id: string;
+  nome_pagador: string;
+  whatsapp_pagador: string | null;
+  mensagem: string | null;
+  valor_centavos: number;
+  pago_em: string;
+  agradecido_em: string | null;
+  presentes: string;
+};
+
+export type ConviteResumo = {
+  codigo: string;
+  familia: string;
+  precisa_transporte: boolean;
+  pessoas: {
+    nome: string;
+    status: "pendente" | "vem" | "nao_vem";
+    crianca: boolean;
+    restricao: string | null;
+  }[];
+};
+
 /** O que abre a folha de pagamento. */
 export type Escolha = {
   presenteId: string;

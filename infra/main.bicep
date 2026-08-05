@@ -59,6 +59,10 @@ param segredoWebhook string = ''
 @secure()
 param segredoCron string = ''
 
+@description('Senha única do painel /admin. Vazia = painel fechado para todos.')
+@secure()
+param senhaAdmin string = ''
+
 var tags = { projeto: 'casamento' }
 
 // ---------------------------------------------------------------------
@@ -175,6 +179,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = if (implantarApp) {
         { name: 'mp-access-token', value: tokenMp }
         { name: 'mp-webhook-secret', value: segredoWebhook }
         { name: 'cron-secret', value: segredoCron }
+        { name: 'admin-senha', value: senhaAdmin }
       ]
     }
     template: {
@@ -195,6 +200,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = if (implantarApp) {
             { name: 'MP_PUBLIC_KEY', value: chavePublicaMp }
             { name: 'MP_WEBHOOK_SECRET', secretRef: 'mp-webhook-secret' }
             { name: 'CRON_SECRET', secretRef: 'cron-secret' }
+            { name: 'ADMIN_SENHA', secretRef: 'admin-senha' }
           ]
           probes: [
             {
