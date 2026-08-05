@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { reais } from "@/lib/formato";
+import { mascararWhatsapp, normalizarWhatsapp } from "@/lib/telefone";
 import type { Escolha } from "@/lib/tipos";
 
 type Pedido = {
@@ -54,7 +55,7 @@ function Cronometro({ ate }: { ate: string }) {
 export function ProvedorPagamento({ children }: { children: React.ReactNode }) {
   const [escolha, setEscolha] = useState<Escolha | null>(null);
   const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
   const [mensagem, setMensagem] = useState("");
   const [valorLivre, setValorLivre] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -116,6 +117,12 @@ export function ProvedorPagamento({ children }: { children: React.ReactNode }) {
       setErro("Escolha um valor.");
       return;
     }
+    // Validado aqui e de novo no servidor. Aqui é para a pessoa corrigir na
+    // hora, com o teclado ainda aberto; lá é porque o servidor não confia.
+    if (whatsapp.trim() && !normalizarWhatsapp(whatsapp)) {
+      setErro("Esse número não parece um WhatsApp. Confira o DDD e o 9 na frente.");
+      return;
+    }
 
     setEnviando(true);
     setErro(null);
@@ -126,7 +133,7 @@ export function ProvedorPagamento({ children }: { children: React.ReactNode }) {
         // Nenhum campo de valor: o preço sai do banco (invariante 1).
         body: JSON.stringify({
           nome: nome.trim(),
-          email: email.trim() || undefined,
+          whatsapp: whatsapp.trim() || undefined,
           mensagem: mensagem.trim() || undefined,
           itens: [{ presenteId: escolha.presenteId, cotas }],
         }),
@@ -270,19 +277,28 @@ export function ProvedorPagamento({ children }: { children: React.ReactNode }) {
                 onChange={(e) => setNome(e.target.value)}
               />
 
-              <label className="rotulo" htmlFor="pagador-email">
-                E-mail (opcional)
+              <label className="rotulo" htmlFor="pagador-whatsapp">
+                Seu WhatsApp
               </label>
               <input
-                id="pagador-email"
+                id="pagador-whatsapp"
                 className="folha__campo"
                 style={{ marginTop: ".6rem" }}
-                type="email"
-                autoComplete="email"
-                placeholder="para receber o comprovante"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel-national"
+                placeholder="(62) 99999-9999"
+                value={whatsapp}
+                onChange={(e) => setWhatsapp(mascararWhatsapp(e.target.value))}
+                aria-describedby="whatsapp-ajuda"
               />
+              <p
+                id="whatsapp-ajuda"
+                className="folha__prazo"
+                style={{ margin: "-.35rem 0 1rem" }}
+              >
+                É por aqui que o casal manda o obrigado.
+              </p>
 
               <label className="rotulo" htmlFor="pagador-mensagem">
                 Um recado (opcional)

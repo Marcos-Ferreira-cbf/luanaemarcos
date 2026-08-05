@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { transacao } from "@/lib/db";
 import { criarPagamentoPix } from "@/lib/mercadopago";
+import { normalizarWhatsapp } from "@/lib/telefone";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,7 +18,12 @@ type ItemEntrada = { presenteId: string; cotas?: number };
  * quanto custa.
  */
 export async function POST(req: Request) {
-  let corpo: { nome?: string; email?: string; mensagem?: string; itens?: ItemEntrada[] };
+  let corpo: {
+    nome?: string;
+    whatsapp?: string;
+    mensagem?: string;
+    itens?: ItemEntrada[];
+  };
   try {
     corpo = await req.json();
   } catch {
@@ -32,6 +38,17 @@ export async function POST(req: Request) {
   }
   if (!Array.isArray(itens) || itens.length === 0) {
     return NextResponse.json({ erro: "escolha ao menos um presente" }, { status: 400 });
+  }
+
+  // O número é opcional, mas número errado não passa: guardar um telefone que
+  // não disca é pior do que não ter nenhum — o casal só descobre na hora de
+  // agradecer, quando já não dá para perguntar.
+  const whatsapp = corpo.whatsapp?.trim() ? normalizarWhatsapp(corpo.whatsapp) : null;
+  if (corpo.whatsapp?.trim() && !whatsapp) {
+    return NextResponse.json(
+      { erro: "esse número não parece um WhatsApp. Confira o DDD e o 9 na frente." },
+      { status: 400 },
+    );
   }
 
   const expiraEm = new Date(Date.now() + MINUTOS_PARA_PAGAR * 60_000);
@@ -55,10 +72,10 @@ export async function POST(req: Request) {
       }
 
       const { rows: criado } = await c.query<{ id: string }>(
-        `insert into pedidos (valor_centavos, metodo, nome_pagador, email_pagador, mensagem, expira_em)
+        `insert into pedidos (valor_centavos, metodo, nome_pagador, whatsapp_pagador, mensagem, expira_em)
          values ($1, 'pix', $2, $3, $4, $5)
          returning id`,
-        [total, nome, corpo.email ?? null, corpo.mensagem ?? null, expiraEm],
+        [total, nome, whatsapp, corpo.mensagem ?? null, expiraEm],
       );
       const pedidoId = criado[0].id;
 
@@ -78,7 +95,6 @@ export async function POST(req: Request) {
       valorCentavos: pedido.total,
       descricao: "Presente de casamento — Luana e Marcos",
       nome,
-      email: corpo.email,
       expiraEm,
     });
 

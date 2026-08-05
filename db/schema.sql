@@ -95,6 +95,8 @@ create table if not exists pedidos (
 
   nome_pagador      text not null,
   email_pagador     text,
+  -- E.164 sem o +, sempre: 5562996325652. É por aqui que sai o agradecimento.
+  whatsapp_pagador  text,
   mensagem          text,
 
   psp               text not null default 'mercadopago',
@@ -110,7 +112,17 @@ create table if not exists pedidos (
   constraint pagamento_unico_por_psp unique (psp, psp_pagamento_id)
 );
 
+-- create table if not exists não mexe em tabela que já existe. Colunas novas
+-- entram aqui, uma linha por coluna, para o schema seguir aplicável em banco
+-- vazio e em banco em produção.
+alter table pedidos add column if not exists whatsapp_pagador text;
+alter table pedidos add column if not exists agradecido_em    timestamptz;
+
 create index if not exists idx_pedidos_status on pedidos (status);
+
+-- Quem pagou e ainda não recebeu o obrigado. É a fila do agradecimento.
+create index if not exists idx_pedidos_a_agradecer on pedidos (pago_em)
+  where status = 'pago' and agradecido_em is null;
 create index if not exists idx_pedidos_pendentes on pedidos (expira_em)
   where status = 'pendente';
 
