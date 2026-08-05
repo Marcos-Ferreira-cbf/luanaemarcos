@@ -55,52 +55,75 @@ az postgres flexible-server firewall-rule create \
 
 E removê-la depois. O `/api/saude` continua consultando o banco: sem hibernação para acordar, ele agora serve ao propósito original — não subir revisão que não fala com o Postgres.
 
+## Estado
+
+| | |
+|---|---|
+| App no ar | `https://ca-casamento.thankfuldesert-78409711.brazilsouth.azurecontainerapps.io` |
+| Imagem | `ghcr.io/marcos-ferreira-cbf/luanaemarcos` — **pacote público** |
+| Identidade do CI | `gh-casamento`, appId `11fb7866-36f2-4390-9c87-f6f9e5b3c4e5` |
+| Zona DNS | `marcoseluana.social.br` no grupo `BTS_DNS`, registros criados |
+| Falta | delegação no registro.br, 4 secrets no GitHub, domínio amarrado |
+
+O pacote no GHCR é público de propósito: o repositório já é, e a imagem não
+carrega segredo nenhum — tudo entra por env em tempo de execução. Pull anônimo
+significa nenhum token para girar, vazar ou esquecer.
+
 ## Ordem de execução
 
 Não há GitHub CLI nesta máquina, então os passos que envolvem o GitHub são pela web.
 
 **1. Repositório** — já criado: `Marcos-Ferreira-cbf/luanaemarcos`.
 
-**2. Azure** — grupo de recursos e infraestrutura via Bicep:
+**2. Azure** — grupo de recursos e infraestrutura via Bicep. O `subir.ps1` lê os
+segredos do `.env.local` em vez de recebê-los na linha de comando, onde ficariam
+no histórico do shell:
 
-```bash
+```powershell
 az login
-az account set --subscription 2fffc0d6-babb-47fd-9c94-2329adf1dcf0
 az group create -n rg-casamento-luanaemarcos -l brazilsouth
-az deployment group create -g rg-casamento-luanaemarcos -f infra/main.bicep
+pwsh infra/subir.ps1 -Imagem ghcr.io/marcos-ferreira-cbf/luanaemarcos:<sha>
 ```
 
 **3. Banco** — rodar `db/schema.sql` e `db/seed.sql` contra o servidor criado.
 
-**4. Identidade federada para o CI** — cria o App Registration e autoriza o push da `main` a fazer login sem senha:
-
-```bash
-az ad app create --display-name gh-casamento
-# guarde o appId; crie o service principal e dê contributor no grupo
-az ad app federated-credential create --id <appId> --parameters '{
-  "name": "main",
-  "issuer": "https://token.actions.githubusercontent.com",
-  "subject": "repo:Marcos-Ferreira-cbf/luanaemarcos:ref:refs/heads/main",
-  "audiences": ["api://AzureADTokenExchange"]
-}'
-```
+**4. Identidade federada para o CI** — feito. O App Registration `gh-casamento`
+tem Contributor no grupo e uma credencial federada para `refs/heads/main`, então
+o push loga no Azure sem senha nenhuma no repositório.
 
 **5. Secrets no GitHub** — em *Settings → Secrets and variables → Actions*:
 
-| Secret | Origem |
+| Secret | Valor |
 |---|---|
-| `AZURE_CLIENT_ID` | `appId` do passo 4 |
+| `AZURE_CLIENT_ID` | `11fb7866-36f2-4390-9c87-f6f9e5b3c4e5` |
 | `AZURE_TENANT_ID` | `a83a9085-15cb-4498-b40f-f670c65350cf` |
 | `AZURE_SUBSCRIPTION_ID` | `2fffc0d6-babb-47fd-9c94-2329adf1dcf0` |
-| `CRON_SECRET` | a mesma string passada ao Bicep |
+| `CRON_SECRET` | o mesmo do `.env.local` |
 
 São só esses quatro. `DATABASE_URL` e os segredos do Mercado Pago vivem nos secrets do Container App, montados pelo Bicep — o workflow só troca a imagem, então não precisa vê-los.
 
-**6. Domínio** — `marcoseluana.social.br` no registro.br, CNAME para o FQDN do Container App, certificado gerenciado pelo próprio Container Apps.
+**6. Domínio** — a zona `marcoseluana.social.br` está no Azure DNS (grupo
+`BTS_DNS`) com os registros prontos: `A` no apex para o IP estático do ambiente,
+`CNAME` no `www`, e os `asuid` TXT que provam a posse. Falta o registro.br
+publicar a delegação para `ns1-08.azure-dns.com` e companhia — o Container Apps
+valida consultando a internet, não o seu Azure.
+
+Quando a delegação virar:
+
+```powershell
+pwsh infra/dominio.ps1
+```
+
+O script cria o certificado gerenciado (grátis) e amarra apex e `www`. Depois,
+um `subir.ps1 -UrlPublica https://marcoseluana.social.br` acerta o `APP_URL`,
+que é o que vai no `notification_url` de cada cobrança.
 
 ## Deploy
 
 `git push` na `main` builda, publica no GHCR e sobe uma nova revisão. Ver [.github/workflows/deploy.yml](.github/workflows/deploy.yml).
+
+O nome da imagem é forçado para minúsculas no workflow: `github.repository` é
+`Marcos-Ferreira-cbf/...` e nome de imagem Docker é minúsculo por especificação.
 
 O cron de conciliação roda a cada 10 minutos pelo GitHub Actions. Ver [.github/workflows/conciliacao.yml](.github/workflows/conciliacao.yml).
 
