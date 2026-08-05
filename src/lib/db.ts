@@ -1,18 +1,20 @@
 import { Pool } from "pg";
 
 /**
- * Postgres via connection string — funciona igual no Neon, no Azure Database
- * for PostgreSQL ou num contêiner local. Trocar de provedor é trocar a env.
+ * Postgres via connection string — funciona igual no Azure Database for
+ * PostgreSQL, num contêiner local ou em qualquer provedor gerenciado.
+ * Trocar de provedor é trocar a env.
  *
- * O Neon fecha a conexão quando o compute hiberna, então o pool é pequeno e
- * com timeout curto: reconectar é barato, segurar conexão morta não é.
+ * O pool é pequeno de propósito: o Burstable B1ms tem poucas conexões
+ * disponíveis, e uma réplica de 0,25 vCPU não atende nada em paralelo que
+ * justifique mais. Reconectar é barato; segurar conexão morta não é.
  */
 export const db = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.DATABASE_URL?.includes("localhost") ? false : { rejectUnauthorized: true },
   max: 5,
   idleTimeoutMillis: 10_000,
-  connectionTimeoutMillis: 15_000, // o primeiro acesso após hibernar leva alguns segundos
+  connectionTimeoutMillis: 15_000, // folga para o handshake TLS numa maquina burstable
 });
 
 /** Executa um bloco dentro de uma transação, com rollback automático em erro. */

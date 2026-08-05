@@ -46,6 +46,6 @@ jobs:
       - name: Nova revisão no Container Apps
         run: |
           az containerapp update \
-            -g rg-casamento \
+            -g rg-casamento-luanaemarcos \
             -n ca-casamento \
             --image ghcr.io/${{ github.repository }}:${{ github.sha }}

@@ -7,12 +7,13 @@ Site do casamento: lista de presentes com pagamento via Pix (Mercado Pago).
 | Peça | Escolha |
 |---|---|
 | Aplicação | Next.js em Azure Container Apps (plano Consumo) |
-| Banco | Neon Serverless Postgres |
+| Banco | Azure Database for PostgreSQL Flexible Server (Burstable B1ms) |
 | Imagem | GitHub Container Registry |
 | Cron | GitHub Actions agendado (conciliação a cada 10 min) |
 | Domínio | marcoseluana.social.br |
 
-Custo alvo: ~R$ 30/mês.
+Hospedado na assinatura **Azure Sponsorship** da BTS Consulting, grupo de
+recursos `rg-casamento-luanaemarcos`, região `brazilsouth`.
 
 ## Desenvolvimento
 

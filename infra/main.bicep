@@ -6,11 +6,15 @@
 //   - segredos em Container Apps secrets (grátis) em vez de Key Vault
 //   - fotos empacotadas na imagem em vez de Blob Storage
 //   - cron no GitHub Actions em vez de Container Apps Job
-//   - Postgres no plano gratuito do Neon, fora do Azure
 //
-// az deployment group create -g rg-casamento \
+// O Postgres voltou para dentro do Azure: a assinatura é Sponsorship, e o
+// crédito cobre o Flexible Server. Some o cold start do Neon, some a
+// latência entre nuvens, e o banco fica na mesma região do app.
+//
+// az deployment group create -g rg-casamento-luanaemarcos \
 //   --template-file infra/main.bicep \
-//   --parameters urlBanco=<neon> tokenMp=<...> segredoWebhook=<...> segredoCron=<...>
+//   --parameters senhaBanco=<...> tokenGhcr=<...> tokenMp=<...> \
+//                chavePublicaMp=<...> segredoWebhook=<...> segredoCron=<...>
 // =====================================================================
 
 param prefixo string = 'casamento'
@@ -27,9 +31,12 @@ param usuarioGhcr string = 'CHANGEME'
 @description('Personal Access Token com escopo read:packages.')
 param tokenGhcr string
 
+@description('Login administrador do Postgres.')
+param usuarioBanco string = 'casamento'
+
 @secure()
-@description('Connection string do Neon: postgresql://user:senha@host/db?sslmode=require')
-param urlBanco string
+@description('Senha do administrador do Postgres. Mínimo 8 caracteres, com maiúscula, minúscula e número.')
+param senhaBanco string
 
 @secure()
 param tokenMp string
@@ -59,6 +66,61 @@ resource logs 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   }
 }
 
+// ---------------------------------------------------------------------
+// Postgres
+//
+// Burstable B1ms: a menor máquina que existe, e sobra para 110 convidados.
+// O tráfego real deste site são alguns picos de minutos — na véspera do
+// RSVP e na semana dos presentes. Nada que justifique sair do burstable.
+// ---------------------------------------------------------------------
+resource banco 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
+  name: 'pg-${prefixo}'
+  location: local
+  tags: tags
+  sku: {
+    name: 'Standard_B1ms'
+    tier: 'Burstable'
+  }
+  properties: {
+    version: '16'
+    administratorLogin: usuarioBanco
+    administratorLoginPassword: senhaBanco
+    storage: {
+      storageSizeGB: 32
+      autoGrow: 'Enabled'
+    }
+    backup: {
+      backupRetentionDays: 7
+      geoRedundantBackup: 'Disabled'
+    }
+    highAvailability: { mode: 'Disabled' }
+    network: { publicNetworkAccess: 'Enabled' }
+  }
+}
+
+resource bancoCasamento 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2024-08-01' = {
+  parent: banco
+  name: 'casamento'
+  properties: {
+    charset: 'UTF8'
+    collation: 'en_US.utf8'
+  }
+}
+
+// O Container Apps no plano Consumo sai por IPs que não dá para prever,
+// então a liberação é para "serviços do Azure" (a faixa 0.0.0.0 especial).
+// O que protege o banco é a senha, não a origem.
+resource liberaAzure 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2024-08-01' = {
+  parent: banco
+  name: 'AllowAzureServices'
+  properties: {
+    startIpAddress: '0.0.0.0'
+    endIpAddress: '0.0.0.0'
+  }
+}
+
+var urlBanco = 'postgresql://${usuarioBanco}:${senhaBanco}@${banco.properties.fullyQualifiedDomainName}/casamento?sslmode=require'
+
 resource ambiente 'Microsoft.App/managedEnvironments@2024-03-01' = {
   name: 'cae-${prefixo}'
   location: local
@@ -78,6 +140,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
   name: 'ca-${prefixo}'
   location: local
   tags: tags
+  dependsOn: [bancoCasamento, liberaAzure]
   properties: {
     managedEnvironmentId: ambiente.id
     configuration: {
