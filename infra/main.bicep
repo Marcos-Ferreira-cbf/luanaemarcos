@@ -34,6 +34,9 @@ param urlBanco string
 @secure()
 param tokenMp string
 
+@description('Public key do Mercado Pago. Vai para o navegador, então não é secure().')
+param chavePublicaMp string
+
 @secure()
 param segredoWebhook string
 
@@ -112,6 +115,10 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'NODE_ENV', value: 'production' }
             { name: 'DATABASE_URL', secretRef: 'database-url' }
             { name: 'MP_ACCESS_TOKEN', secretRef: 'mp-access-token' }
+            // Vai como value, não secretRef: a chave é pública por desenho.
+            // Lida no servidor e passada como prop ao Brick — sem prefixo
+            // NEXT_PUBLIC_, que seria resolvido no build e chegaria vazio.
+            { name: 'MP_PUBLIC_KEY', value: chavePublicaMp }
             { name: 'MP_WEBHOOK_SECRET', secretRef: 'mp-webhook-secret' }
             { name: 'CRON_SECRET', secretRef: 'cron-secret' }
           ]
