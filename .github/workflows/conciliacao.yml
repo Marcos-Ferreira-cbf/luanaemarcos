@@ -1,0 +1,24 @@
+name: conciliacao
+
+# Webhook perdido é normal. Este cron é a rede de segurança:
+# reconcilia todo pedido pendente com mais de 15 minutos e
+# libera as cotas reservadas que expiraram.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  conciliar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chamar a rota de conciliação
+        run: |
+          resposta=$(curl -sS --fail-with-body \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://marcoseluana.social.br/api/cron/conciliacao)
+
+          echo "$resposta"
+
+          # falha o job se a resposta não tiver o formato esperado
+          echo "$resposta" | grep -q '"expirados"'
