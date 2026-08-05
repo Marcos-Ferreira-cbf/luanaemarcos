@@ -18,6 +18,13 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
 
+      # github.repository é Marcos-Ferreira-cbf/luanaemarcos, com maiúsculas.
+      # Nome de imagem Docker é minúsculo por especificação, e o push falha
+      # com "repository name must be lowercase" antes de qualquer outra coisa.
+      - name: Nome da imagem
+        id: img
+        run: echo "nome=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
       - name: Login no GHCR
         uses: docker/login-action@v3
         with:
@@ -31,8 +38,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
+            ${{ steps.img.outputs.nome }}:latest
+            ${{ steps.img.outputs.nome }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -52,7 +59,7 @@ jobs:
             az containerapp update \
               -g rg-casamento-luanaemarcos \
               -n ca-casamento \
-              --image ghcr.io/${{ github.repository }}:${{ github.sha }}
+              --image ${{ steps.img.outputs.nome }}:${{ github.sha }}
           else
-            echo "::notice::Container App ainda não existe. Imagem publicada; rode o Bicep uma vez com implantarApp=true e imagem=ghcr.io/${{ github.repository }}:${{ github.sha }}"
+            echo "::notice::Container App ainda não existe. Imagem publicada; rode o Bicep uma vez com implantarApp=true e imagem=${{ steps.img.outputs.nome }}:${{ github.sha }}"
           fi
