@@ -1,5 +1,12 @@
 import { Pool } from "pg";
 
+/**
+ * Postgres via connection string — funciona igual no Neon, no Azure Database
+ * for PostgreSQL ou num contêiner local. Trocar de provedor é trocar a env.
+ *
+ * O Neon fecha a conexão quando o compute hiberna, então o pool é pequeno e
+ * com timeout curto: reconectar é barato, segurar conexão morta não é.
+ */
 export const db = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.DATABASE_URL?.includes("localhost") ? false : { rejectUnauthorized: true },

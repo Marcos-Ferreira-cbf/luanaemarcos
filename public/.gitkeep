@@ -1,0 +1,2 @@
+# As fotos do ensaio em WebP entram aqui, extraídas do base64 do prototipo.html.
+# O Dockerfile copia esta pasta, então ela precisa existir mesmo vazia.

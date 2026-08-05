@@ -1,0 +1,50 @@
+/*
+ * Tokens tirados das próprias fotos do ensaio: areia, brancos lavados de sol
+ * e o azul-ardósia dos costões. Nenhuma cor decorativa entra na página —
+ * a cor vem das imagens e a interface fica em silêncio.
+ */
+:root {
+  --luz: #faf8f5;
+  --areia: #ede6dd;
+  --mare: #26333a;
+  --onda: #55707b;
+  --tinta: #1f2a2f;
+
+  --serif: "Instrument Serif", Georgia, serif;
+  --sans: "Instrument Sans", system-ui, sans-serif;
+  --mono: "DM Mono", ui-monospace, monospace;
+
+  --toque: 52px; /* alvo mínimo de toque */
+  --ar: clamp(4rem, 13vw, 7rem);
+  --marg: clamp(1.5rem, 6vw, 2.5rem);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--luz);
+  color: var(--tinta);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+:is(a, button, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--mare);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
