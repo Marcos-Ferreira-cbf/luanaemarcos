@@ -127,10 +127,7 @@ export default async function Pagina() {
           </div>
           <div className="linha">
             <span className="rotulo">Traje</span>
-            <span className="linha__val">
-              Esporte fino
-              <span className="linha__obs">Confirmar com o casal</span>
-            </span>
+            <span className="linha__val">Esporte fino</span>
           </div>
 
           <div style={{ display: "grid", gap: ".7rem", marginTop: "2rem" }}>
