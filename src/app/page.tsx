@@ -109,6 +109,8 @@ export default async function Pagina() {
           <p className="rotulo">O dia</p>
           <h2 className="titulo">Sábado, 10 de outubro</h2>
 
+          {/* O mapa fica na linha do próprio evento: embaixo, num bloco de
+              botões, ele se lê como rodapé da seção e passa batido. */}
           <div className="linha">
             <span className="rotulo">09h30</span>
             <span className="linha__val">
@@ -117,6 +119,9 @@ export default async function Pagina() {
                 Capela Nossa Senhora de Lourdes, a Santinha — Barro Alto, GO
               </span>
             </span>
+            <a href={CAPELA} target="_blank" rel="noopener" className="linha__mapa">
+              Como chegar
+            </a>
           </div>
           <div className="linha">
             <span className="rotulo">12h00</span>
@@ -124,19 +129,13 @@ export default async function Pagina() {
               Almoço
               <span className="linha__obs">Sítio Correa — Souzalândia, Barro Alto, GO</span>
             </span>
+            <a href={SITIO} target="_blank" rel="noopener" className="linha__mapa">
+              Como chegar
+            </a>
           </div>
           <div className="linha">
             <span className="rotulo">Traje</span>
             <span className="linha__val">Esporte fino</span>
-          </div>
-
-          <div style={{ display: "grid", gap: ".7rem", marginTop: "2rem" }}>
-            <a href={CAPELA} target="_blank" rel="noopener" className="btn btn--linha">
-              Como chegar na capela
-            </a>
-            <a href={SITIO} target="_blank" rel="noopener" className="btn btn--linha">
-              Como chegar no sítio
-            </a>
           </div>
         </Surge>
       </section>

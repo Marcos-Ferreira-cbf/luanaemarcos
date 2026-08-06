@@ -207,7 +207,7 @@ img {
 /* ============ o dia ============ */
 .linha {
   display: grid;
-  grid-template-columns: 5.5rem 1fr;
+  grid-template-columns: 5.5rem 1fr auto;
   gap: 1.2rem;
   padding: 1.2rem 0;
   border-top: 1px solid color-mix(in srgb, var(--tinta) 12%, transparent);
@@ -224,6 +224,35 @@ img {
   font-size: 0.95rem;
   opacity: 0.8;
   margin-top: 0.15rem;
+}
+.linha__mapa {
+  justify-self: end;
+  font-size: 0.88rem;
+  color: var(--onda);
+  white-space: nowrap;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  /* O padding dá os ~44px de área de toque; a margem negativa devolve o
+     espaço, para o link não empurrar a altura da linha. */
+  padding: 0.7rem 0 0.7rem 0.5rem;
+  margin: -0.7rem 0;
+}
+.linha__mapa:hover {
+  color: var(--tinta);
+}
+
+/* Em tela estreita não cabem três colunas: o link desce, mas continua dentro
+   da linha do evento — que é o ponto. */
+@media (max-width: 560px) {
+  .linha {
+    grid-template-columns: 5.5rem 1fr;
+  }
+  .linha__mapa {
+    grid-column: 2;
+    justify-self: start;
+    padding-left: 0;
+    margin-top: 0.1rem;
+  }
 }
 
 /* ============ botões ============ */
