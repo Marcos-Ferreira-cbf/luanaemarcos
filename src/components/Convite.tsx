@@ -1,14 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import Folhagem from "./Folhagem";
 
 /**
  * O convite propriamente dito: uma peça para guardar, imprimir ou postar.
  *
- * É tipográfico de propósito, sem foto. Foto de fundo em convite impresso
- * come tinta, some no papel comum e briga com o texto por cima; e numa tela
- * de celular, o que carrega a emoção aqui é o nome da pessoa em serifa
- * grande, não mais uma imagem que ela já viu na capa do site.
+ * Proporção de A4 em pé, folhagem em dois cantos opostos, nomes em
+ * caligrafia e a faixa da data em três campos — é o convite de casamento
+ * que todo mundo reconhece, e reconhecer é metade do trabalho aqui.
+ *
+ * O versículo ficou de fora: dentro de uma A4 ele empurrava o endereço para
+ * cima da folhagem, e ele já abre a página inicial. Convite de papel diz
+ * quem, quando e onde — o resto é o site.
  *
  * O código do convite NÃO aparece na peça. Ele é a chave da confirmação —
  * quem tem o código responde pelo convidado. Um convite feito para ser
@@ -20,7 +24,7 @@ export default function Convite({ nome }: { nome: string }) {
   async function compartilhar() {
     const dados = {
       title: "Marcos & Luana · 10.10.2026",
-      text: `Fui convidado para o casamento de Marcos e Luana!`,
+      text: "Fui convidado para o casamento de Marcos e Luana!",
       url: "https://marcoseluana.social.br",
     };
 
@@ -49,41 +53,48 @@ export default function Convite({ nome }: { nome: string }) {
   return (
     <>
       <article className="convite" aria-label={`Convite de casamento para ${nome}`}>
-        <p className="convite__alto">Com a bênção de Deus</p>
+        <Folhagem canto="cima" />
+        <Folhagem canto="baixo" />
 
-        <h1 className="convite__nomes">
-          Marcos <em>&amp;</em> Luana
-        </h1>
+        <div className="convite__miolo">
+          <h1 className="convite__nomes">
+            <span>Marcos</span>
+            <span className="convite__e">&amp;</span>
+            <span>Luana</span>
+          </h1>
 
-        <p className="convite__ornamento" aria-hidden="true" />
-
-        <p className="convite__frase">têm a alegria de convidar</p>
-        <p className="convite__convidado">{nome}</p>
-        <p className="convite__frase">para a celebração do seu casamento</p>
-
-        <p className="convite__ornamento" aria-hidden="true" />
-
-        <p className="convite__data">
-          Sábado, 10 de outubro de 2026
-        </p>
-
-        <div className="convite__onde">
-          <p>
-            <span className="convite__hora">09h30</span>
-            Capela Nossa Senhora de Lourdes, a Santinha
+          <p className="convite__chamada">
+            Venha celebrar conosco
+            <br />
+            esse dia especial!
           </p>
-          <p>
-            <span className="convite__hora">12h00</span>
-            Almoço no Sítio Correa, Souzalândia
+
+          {/* O nome do convidado é o que faz esta peça ser dela e não de um
+              modelo — por isso vem em serifa, sem caligrafia, para ler bem
+              inclusive num nome comprido. */}
+          <p className="convite__para">
+            <span className="convite__paraRotulo">Convidamos</span>
+            {nome}
           </p>
+
+          <p className="convite__fio" aria-hidden="true" />
+
+          <div className="convite__faixa">
+            <span className="convite__faixaLado">Sábado</span>
+            <span className="convite__faixaMeio">
+              <em>10</em>
+              <strong>OUT</strong>
+              <em>2026</em>
+            </span>
+            <span className="convite__faixaLado">Às 09:30</span>
+          </div>
+
+          <div className="convite__local">
+            <p>Capela Nossa Senhora de Lourdes, a Santinha</p>
+            <p>Almoço ao meio-dia no Sítio Correa, Souzalândia</p>
+            <p className="convite__cidade">Barro Alto · Goiás</p>
+          </div>
         </div>
-
-        <p className="convite__cidade">Barro Alto · Goiás</p>
-
-        <p className="convite__verso">
-          Portanto, o que Deus uniu, não o separe o homem.
-          <span className="convite__ref">Marcos 10:9</span>
-        </p>
       </article>
 
       <div className="convite__acoes">

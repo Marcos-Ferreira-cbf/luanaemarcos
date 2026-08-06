@@ -711,133 +711,177 @@ textarea.folha__campo {
 /* =====================================================================
    o convite — a peça que a pessoa guarda
 
-   Fica sobre o bloco escuro do /rsvp de propósito: papel claro sobre fundo
-   escuro lê como cartão em cima da mesa, e é a mesma imagem que sai na
-   impressão. Tudo aqui é tipografia; não há foto, porque foto de fundo em
-   convite impresso come tinta, some no papel comum e briga com o texto.
+   Aqui o site sai do caminho. O resto da página é areia e maré; o convite é
+   branco com folhagem verde, porque é isso que as pessoas reconhecem como
+   convite de casamento — e reconhecer é metade do trabalho de uma peça que
+   vai ser impressa, guardada na geladeira e postada no Instagram.
+
+   Por isso as cores são locais, não tokens globais: este verde não deve
+   vazar para nenhuma outra tela do site.
    ===================================================================== */
 .convite {
-  background: var(--luz);
-  color: var(--tinta);
-  text-align: center;
-  padding: clamp(2.5rem, 9vw, 4rem) clamp(1.5rem, 7vw, 3rem);
-  /* A moldura dupla é o truque do convite de papel: a linha de fora encosta
-     na borda, a de dentro dá o respiro. Uma linha só fica burocrática. */
-  border: 1px solid var(--areia);
-  outline: 1px solid var(--onda);
-  outline-offset: -10px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
-}
+  --verde: #5f7d55;
+  --verde-claro: #a8c39c;
+  --papel: #fff;
 
-.convite__alto,
-.convite__frase {
-  font-size: 0.9rem;
-  font-style: italic;
-  font-family: var(--serif);
-  color: var(--onda);
-}
-.convite__alto {
-  font-size: 0.72rem;
-  font-style: normal;
-  font-family: var(--sans);
-  font-weight: 600;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  margin-bottom: 2rem;
-}
-
-.convite__nomes {
-  font-family: var(--serif);
-  font-weight: 400;
-  line-height: 1.05;
-  letter-spacing: -0.015em;
-  /* Cabe em "Marcos & Luana" numa linha até em tela de 320px. */
-  font-size: clamp(2.6rem, 13vw, 4.2rem);
-}
-.convite__nomes em {
-  display: block;
-  font-size: 0.42em;
-  color: var(--onda);
-  margin: 0.15em 0;
-}
-
-/* Filete com losango no meio: o separador dos convites de papel, feito só
-   com borda e um pseudo-elemento girado — nada de imagem para carregar. */
-.convite__ornamento {
   position: relative;
-  width: min(62%, 15rem);
-  height: 1px;
-  margin: 2rem auto;
-  background: var(--areia);
+  overflow: hidden;
+  background: var(--papel);
+  color: #2c352a;
+  text-align: center;
+  /* Proporção de A4 em pé. Sem isso a peça vira um retângulo qualquer, e ela
+     precisa parecer papel — inclusive quando for só um print no WhatsApp. */
+  aspect-ratio: 1 / 1.414;
+  container-type: inline-size;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
 }
-.convite__ornamento::after {
-  content: "";
+
+/* Em tela estreita o texto de duas cidades e três linhas de local não cabe
+   dentro de 1:1.414. Melhor a peça crescer do que o texto sumir. */
+@media (max-width: 460px) {
+  .convite {
+    aspect-ratio: auto;
+    padding-block: 3.5rem;
+  }
+}
+
+.folhagem {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 6px;
-  height: 6px;
-  background: var(--onda);
-  transform: translate(-50%, -50%) rotate(45deg);
+  /* 54%: mais que isso e o galho invade a coluna do texto, que fica no
+     meio. A folhagem emoldura; quem lê é o texto. */
+  width: 53%;
+  height: auto;
+  opacity: 0.92;
+  pointer-events: none;
+}
+.folhagem--cima {
+  top: 0;
+  left: 0;
+}
+.folhagem--baixo {
+  /* Puxado para fora do canto: centrado, o arco de baixo passava por cima de
+     "Barro Alto · Goiás". Folhagem emoldura, não risca o texto. */
+  bottom: 0;
+  right: -2%;
 }
 
-.convite__convidado {
-  font-family: var(--serif);
-  font-size: clamp(1.7rem, 8vw, 2.5rem);
-  line-height: 1.15;
-  margin: 0.6rem 0;
+.convite__miolo {
+  position: relative; /* acima da folhagem */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* O respiro extra embaixo empurra o texto para cima do buquê inferior.
+     Sem ele, "Barro Alto" cai bem no meio dos galhos. */
+  padding: 6% 13% 15%;
 }
 
-.convite__data {
-  font-family: var(--serif);
-  font-size: clamp(1.15rem, 5vw, 1.5rem);
-  margin-bottom: 1.6rem;
+/* Tudo daqui para baixo mede em cqw — a peça precisa encolher inteira e em
+   proporção, seja num celular de 340px ou numa folha A4 impressa. */
+.convite__nomes {
+  font-family: var(--fonte-script), cursive;
+  font-weight: 400;
+  color: var(--verde);
+  font-size: 17cqw;
+  /* A caligrafia tem ascendentes e descendentes longos; entrelinha de fonte
+     normal faria o "f" de um nome bater na letra de baixo. */
+  line-height: 0.92;
+  letter-spacing: 0.01em;
 }
-
-.convite__onde p {
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: color-mix(in srgb, var(--tinta) 92%, transparent);
-  margin-bottom: 0.7rem;
-}
-/* A hora em mono e em bloco alinha 09h30 embaixo de 12h00 mesmo com o texto
-   ao lado quebrando em duas linhas. */
-.convite__hora {
+.convite__nomes span {
   display: block;
-  font-family: var(--mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.1em;
-  color: var(--onda);
+}
+.convite__e {
+  font-size: 0.5em;
+  margin: 0.06em 0;
 }
 
+.convite__chamada {
+  font-family: var(--serif);
+  font-size: 4.4cqw;
+  line-height: 1.35;
+  margin-top: 4cqw;
+}
+
+.convite__para {
+  font-family: var(--serif);
+  font-size: 5cqw;
+  line-height: 1.25;
+  margin-top: 4.5cqw;
+}
+.convite__paraRotulo {
+  display: block;
+  font-family: var(--sans);
+  font-size: 2.5cqw;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--verde);
+  margin-bottom: 0.9em;
+}
+
+/* O laço do convite de papel: uma onda, feita com duas curvas e nenhum
+   arquivo de imagem. */
+.convite__fio {
+  width: 30%;
+  height: 5cqw;
+  margin: 4cqw auto;
+  background: no-repeat center/contain
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 24' fill='none' stroke='%235f7d55' stroke-width='2.2'%3E%3Cpath d='M4 12c26-16 46 14 70 4s28-20 52-10 44 14 70 6'/%3E%3Cpath d='M16 17c22-10 40 8 62 1' stroke-dasharray='2 4' opacity='.6'/%3E%3C/svg%3E");
+}
+
+/* A faixa da data: dia à esquerda, data no meio, hora à direita, com os
+   fios de régua só nas laterais. É a assinatura visual do convite — o miolo
+   sobe e desce entre duas linhas que os lados não têm. */
+.convite__faixa {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 4cqw;
+  font-family: var(--serif);
+}
+.convite__faixaLado {
+  position: relative;
+  font-size: 3.2cqw;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3cqw 0;
+  border-top: 1px solid var(--verde-claro);
+  border-bottom: 1px solid var(--verde-claro);
+}
+.convite__faixaMeio {
+  display: block;
+  line-height: 1.06;
+}
+.convite__faixaMeio em {
+  display: block;
+  font-style: normal;
+  font-size: 4.4cqw;
+  letter-spacing: 0.08em;
+}
+.convite__faixaMeio strong {
+  display: block;
+  font-weight: 400;
+  font-size: 7cqw;
+  letter-spacing: 0.06em;
+}
+
+.convite__local {
+  margin-top: 5cqw;
+  font-family: var(--serif);
+  font-size: 3.5cqw;
+  line-height: 1.5;
+}
 .convite__cidade {
   font-family: var(--sans);
-  font-size: 0.72rem;
+  font-size: 2.5cqw;
   font-weight: 600;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: var(--onda);
-  margin-top: 1.8rem;
+  color: var(--verde);
+  margin-top: 2.5cqw;
 }
 
-.convite__verso {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: var(--onda);
-  margin-top: 2.4rem;
-  padding-top: 1.8rem;
-  border-top: 1px solid var(--areia);
-}
-.convite__ref {
-  display: block;
-  font-family: var(--mono);
-  font-style: normal;
-  font-size: 0.7rem;
-  letter-spacing: 0.14em;
-  margin-top: 0.6rem;
-}
 
 .convite__acoes {
   display: flex;
@@ -851,8 +895,12 @@ textarea.folha__campo {
 
 /* Imprimir tem que sair o cartão, e só o cartão: sem o cabeçalho, sem o
    formulário de confirmação e sem os dois botões que ninguém quer no papel.
-   A sombra e a cor de fundo saem também — economiza tinta e some no papel. */
+   A sombra sai junto — sombra impressa vira uma tarja cinza. */
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
   body {
     background: #fff;
   }
@@ -867,9 +915,13 @@ textarea.folha__campo {
     position: absolute;
     inset: 0 auto auto 0;
     width: 100%;
+    aspect-ratio: 1 / 1.414;
+    padding-block: 0;
     box-shadow: none;
-    border: none;
-    outline-offset: -14px;
+    /* Sem isso a folhagem sai só no contorno: por padrão o navegador
+       descarta fundos e imagens de fundo na impressão. */
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
   .convite__acoes {
     display: none;

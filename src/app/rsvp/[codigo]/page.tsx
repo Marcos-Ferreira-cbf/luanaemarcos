@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Convite from "@/components/Convite";
 import FormularioRsvp from "@/components/FormularioRsvp";
 import { db } from "@/lib/db";
+import { script } from "@/lib/fontes";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -57,7 +58,9 @@ export default async function PaginaRsvp({
         {/* O convite vem primeiro e o formulário depois: a pessoa abriu o link
             para ver o convite dela, não para responder um questionário. O
             cartão traz o nome dela, então dispensa o título que havia aqui. */}
-        <div style={{ marginTop: "2rem" }}>
+        {/* A caligrafia entra só aqui: é a única tela do site que a usa, e
+            pendurá-la no layout faria a home baixar uma fonte que não mostra. */}
+        <div className={script.variable} style={{ marginTop: "2rem" }}>
           <Convite nome={convite.convidado.nome} />
         </div>
 
