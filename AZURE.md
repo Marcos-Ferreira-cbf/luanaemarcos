@@ -100,29 +100,41 @@ o push loga no Azure sem senha nenhuma no repositório.
 | `AZURE_SUBSCRIPTION_ID` | `2fffc0d6-babb-47fd-9c94-2329adf1dcf0` |
 | `CRON_SECRET` | o mesmo do `.env.local` |
 
-São só esses quatro. `DATABASE_URL` e os segredos do Mercado Pago vivem nos secrets do Container App, montados pelo Bicep — o workflow só troca a imagem, então não precisa vê-los.
+São só esses quatro, e já estão cadastrados. `DATABASE_URL` e os segredos do Mercado Pago vivem nos secrets do Container App, montados pelo Bicep — o workflow só troca a imagem, então não precisa vê-los.
+
+Enquanto eles não existiam, toda run terminava vermelha no passo *Login no Azure*. Vale saber ler esse vermelho: o build e o push da imagem acontecem **antes** do login, então a imagem ficava publicada no GHCR mesmo com a run falhando, e o `az containerapp update` era feito na mão. Run vermelha não significa, necessariamente, imagem ausente.
 
 **6. Domínio** — a zona `marcoseluana.social.br` está no Azure DNS (grupo
 `BTS_DNS`) e o registro.br já delegou para `ns1-08.azure-dns.com` e companhia.
 Resolvendo pela internet: `A` no apex para o IP estático do ambiente, `CNAME` no
-`www`, os `asuid` TXT que provam a posse, e o `_acme-challenge` TXT com o token
-que o `bind` do apex pediu.
+`www`, e os `asuid` TXT que provam a posse.
 
 ```powershell
 pwsh infra/dominio.ps1
 ```
 
-O script cria o certificado gerenciado (grátis) e amarra apex e `www`.
+O script cria o certificado gerenciado (grátis) e amarra apex e `www`. Os dois
+estão `SniEnabled` e servindo HTTPS.
 
-Uma pegadinha: o `bind` do apex imprime o token do `_acme-challenge` e já tenta
-amarrar, mas o certificado só é emitido depois que esse TXT está no ar — então a
-primeira tentativa falha com `CertificateProvisioningError`. Publique o token e
-rode o `bind` de novo; o certificado continua o mesmo, é só a amarração que
-faltou. O `www` valida por CNAME e não pede token nenhum.
+**O apex valida por HTTP, não por TXT.** Isso custou caro para descobrir. Por
+TXT existe um ovo-e-galinha — o token do `_acme-challenge` só sai na saída do
+`bind`, mas a emissão precisa do TXT já publicado — e, pior, cada `bind` emite
+um certificado novo com token novo, deixando o anterior em `Pending` para
+sempre. Certificado `Pending` não se recupera; só se apaga. Duas tentativas
+com o TXT publicado e confirmado no Google e no Cloudflare ficaram 25 minutos
+em `Pending` sem sair do lugar. Por HTTP não há token: o desafio é servido
+pelo próprio app, no IP que o registro `A` já aponta. Saiu em ~10 minutos, de
+primeira.
 
-Depois,
-um `subir.ps1 -UrlPublica https://marcoseluana.social.br` acerta o `APP_URL`,
-que é o que vai no `notification_url` de cada cobrança.
+Outra pegadinha, no `bind` manual: `--certificate` quer o *resource id*
+inteiro do managed certificate, não o nome. Com o nome ele responde `does not
+exist`, o que é enganoso — o certificado está lá.
+
+O `APP_URL` é o que vai no `notification_url` de cada cobrança. O padrão do
+Bicep já é `https://<dominio>`, então depois que o domínio está no ar o
+`subir.ps1` acerta sozinho; o `-UrlPublica` só serve para o período em que o
+DNS ainda não resolvia e era preciso apontar para o FQDN do próprio Container
+App.
 
 ## Deploy
 
