@@ -62,8 +62,8 @@ E removê-la depois. O `/api/saude` continua consultando o banco: sem hibernaç�
 | App no ar | `https://ca-casamento.thankfuldesert-78409711.brazilsouth.azurecontainerapps.io` |
 | Imagem | `ghcr.io/marcos-ferreira-cbf/luanaemarcos` — **pacote público** |
 | Identidade do CI | `gh-casamento`, appId `11fb7866-36f2-4390-9c87-f6f9e5b3c4e5` |
-| Zona DNS | `marcoseluana.social.br` no grupo `BTS_DNS`, registros criados |
-| Falta | delegação no registro.br, 4 secrets no GitHub, domínio amarrado |
+| Zona DNS | `marcoseluana.social.br` no grupo `BTS_DNS`, delegada e resolvendo |
+| Falta | certificado gerenciado sair de `Pending`, 4 secrets no GitHub |
 
 O pacote no GHCR é público de propósito: o repositório já é, e a imagem não
 carrega segredo nenhum — tudo entra por env em tempo de execução. Pull anônimo
@@ -103,18 +103,24 @@ o push loga no Azure sem senha nenhuma no repositório.
 São só esses quatro. `DATABASE_URL` e os segredos do Mercado Pago vivem nos secrets do Container App, montados pelo Bicep — o workflow só troca a imagem, então não precisa vê-los.
 
 **6. Domínio** — a zona `marcoseluana.social.br` está no Azure DNS (grupo
-`BTS_DNS`) com os registros prontos: `A` no apex para o IP estático do ambiente,
-`CNAME` no `www`, e os `asuid` TXT que provam a posse. Falta o registro.br
-publicar a delegação para `ns1-08.azure-dns.com` e companhia — o Container Apps
-valida consultando a internet, não o seu Azure.
-
-Quando a delegação virar:
+`BTS_DNS`) e o registro.br já delegou para `ns1-08.azure-dns.com` e companhia.
+Resolvendo pela internet: `A` no apex para o IP estático do ambiente, `CNAME` no
+`www`, os `asuid` TXT que provam a posse, e o `_acme-challenge` TXT com o token
+que o `bind` do apex pediu.
 
 ```powershell
 pwsh infra/dominio.ps1
 ```
 
-O script cria o certificado gerenciado (grátis) e amarra apex e `www`. Depois,
+O script cria o certificado gerenciado (grátis) e amarra apex e `www`.
+
+Uma pegadinha: o `bind` do apex imprime o token do `_acme-challenge` e já tenta
+amarrar, mas o certificado só é emitido depois que esse TXT está no ar — então a
+primeira tentativa falha com `CertificateProvisioningError`. Publique o token e
+rode o `bind` de novo; o certificado continua o mesmo, é só a amarração que
+faltou. O `www` valida por CNAME e não pede token nenhum.
+
+Depois,
 um `subir.ps1 -UrlPublica https://marcoseluana.social.br` acerta o `APP_URL`,
 que é o que vai no `notification_url` de cada cobrança.
 

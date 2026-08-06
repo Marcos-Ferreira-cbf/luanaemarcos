@@ -15,6 +15,16 @@
 #
 # Entre um e outro o domínio responde sem TLS (bindingType Disabled). São
 # alguns minutos; o certificado pode levar até 20.
+#
+# E há um ovo-e-galinha no apex: o token do _acme-challenge só aparece na saída
+# do bind, mas a emissão precisa desse TXT já publicado. A primeira execução
+# portanto falha com CertificateProvisioningError — é esperado. Publique o token
+# que ela imprimiu e rode o script de novo; o certificado é reaproveitado.
+#
+#   az network dns record-set txt add-record -g BTS_DNS `
+#     -z marcoseluana.social.br -n _acme-challenge -v <token>
+#
+# O www valida por CNAME (que já existe) e não pede token.
 
 param(
   [string]$Grupo = 'rg-casamento-luanaemarcos',

@@ -9,7 +9,11 @@
   --luz: #faf8f5;
   --areia: #ede6dd;
   --mare: #26333a;
-  --onda: #55707b;
+  /* Sobre a luz (#faf8f5) o teal antigo (#55707b) dava 4,9:1 — passa raspando
+     no AA e some quando o texto é 11px em caixa alta com 0.28em de espaço
+     entre letras, que é justo o caso dos rótulos. Este dá 6,3:1 e continua
+     a mesma cor. */
+  --onda: #456068;
   --tinta: #1f2a2f;
 
   --serif: var(--fonte-serif), Georgia, serif;
@@ -63,8 +67,8 @@ img {
 }
 
 .rotulo {
-  font-size: 0.7rem;
-  font-weight: 500;
+  font-size: 0.72rem;
+  font-weight: 600;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--onda);
@@ -152,7 +156,7 @@ img {
   color: var(--luz);
 }
 .bloco--escuro .rotulo {
-  color: rgba(250, 248, 245, 0.6);
+  color: rgba(250, 248, 245, 0.82);
 }
 
 .titulo {
@@ -166,10 +170,10 @@ img {
 .texto {
   font-size: 1.05rem;
   max-width: 38ch;
-  color: color-mix(in srgb, var(--tinta) 82%, transparent);
+  color: color-mix(in srgb, var(--tinta) 92%, transparent);
 }
 .bloco--escuro .texto {
-  color: rgba(250, 248, 245, 0.78);
+  color: rgba(250, 248, 245, 0.88);
 }
 
 /* ============ versículo ============ */
@@ -218,7 +222,7 @@ img {
 .linha__obs {
   display: block;
   font-size: 0.95rem;
-  opacity: 0.65;
+  opacity: 0.8;
   margin-top: 0.15rem;
 }
 
@@ -286,7 +290,7 @@ img {
   border-radius: 4px;
 }
 .campo::placeholder {
-  color: rgba(250, 248, 245, 0.35);
+  color: rgba(250, 248, 245, 0.55);
 }
 .campo:focus-visible {
   outline: 2px solid var(--luz);
@@ -333,7 +337,7 @@ img {
 .item__resta {
   display: block;
   font-size: 0.85rem;
-  opacity: 0.55;
+  opacity: 0.72;
   margin-top: 0.15rem;
 }
 .item__valor {
@@ -350,8 +354,8 @@ img {
   margin-top: 2rem;
 }
 .grupo__nome {
-  font-size: 0.7rem;
-  font-weight: 500;
+  font-size: 0.72rem;
+  font-weight: 600;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--onda);
@@ -363,7 +367,7 @@ img {
   border-top: 1px solid color-mix(in srgb, var(--tinta) 12%, transparent);
   font-size: 0.92rem;
   line-height: 1.6;
-  color: color-mix(in srgb, var(--tinta) 62%, transparent);
+  color: color-mix(in srgb, var(--tinta) 78%, transparent);
   max-width: 44ch;
 }
 
@@ -396,7 +400,7 @@ img {
 .mare__de {
   font-family: var(--mono);
   font-size: 0.9rem;
-  color: rgba(250, 248, 245, 0.6);
+  color: rgba(250, 248, 245, 0.78);
   margin-top: 0.5rem;
 }
 .mare__trilho {
@@ -475,7 +479,7 @@ img {
 /* ============ rodapé ============ */
 .rodape {
   background: var(--mare);
-  color: rgba(250, 248, 245, 0.75);
+  color: rgba(250, 248, 245, 0.86);
   text-align: center;
   padding: var(--ar) 0 3rem;
 }
@@ -488,7 +492,7 @@ img {
   font-family: var(--mono);
   font-size: 0.8rem;
   margin-top: 1.2rem;
-  opacity: 0.6;
+  opacity: 0.78;
 }
 
 /* ============ folha de pagamento ============ */
@@ -540,7 +544,7 @@ img {
 .folha__prazo {
   font-family: var(--mono);
   font-size: 0.82rem;
-  opacity: 0.55;
+  opacity: 0.72;
 }
 .folha__qr {
   width: 190px;
@@ -562,7 +566,7 @@ img {
   font-size: 0.7rem;
   line-height: 1.5;
   word-break: break-all;
-  opacity: 0.45;
+  opacity: 0.62;
   padding: 0.9rem;
   margin-bottom: 1rem;
   background: var(--areia);
@@ -597,7 +601,7 @@ img {
   border-radius: 4px;
 }
 .folha__campo::placeholder {
-  color: color-mix(in srgb, var(--tinta) 40%, transparent);
+  color: color-mix(in srgb, var(--tinta) 55%, transparent);
 }
 .folha__campo:focus-visible {
   outline: 2px solid var(--onda);
@@ -763,7 +767,7 @@ textarea.folha__campo {
 }
 /* já agradecido sai do caminho, mas continua legível e reversível */
 .cartao[data-feito="true"] {
-  opacity: 0.55;
+  opacity: 0.68;
 }
 .cartao__linha {
   display: flex;
