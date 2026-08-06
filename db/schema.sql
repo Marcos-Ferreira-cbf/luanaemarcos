@@ -49,6 +49,15 @@ create table if not exists convites (
 alter table convites add column if not exists whatsapp           text;
 alter table convites add column if not exists convite_enviado_em timestamptz;
 
+-- Padrinhos são a exceção à regra do convite individual, e a exceção é o
+-- ponto: o convite de padrinho é um pedido, não um aviso, e um pedido se faz
+-- ao casal junto. Um convite tipo='padrinhos' tem dois convidados e um link
+-- só — cada um responde o seu "aceito", mas os dois leem o mesmo pedido.
+alter table convites add column if not exists tipo text not null default 'individual';
+alter table convites drop constraint if exists convites_tipo_check;
+alter table convites add constraint convites_tipo_check
+  check (tipo in ('individual', 'padrinhos'));
+
 -- Sobras do modelo por família, que morreu quando o convite virou individual.
 -- As duas tabelas estavam vazias, então isto não é migração — é limpeza.
 alter table convites drop column if exists familia;
@@ -69,6 +78,11 @@ create table if not exists convidados (
   restricao_alimentar text,
   respondido_em       timestamptz
 );
+
+-- O número por pessoa existe por causa dos padrinhos: o link é um só, do
+-- casal, mas ele é mandado para os dois celulares. Em convite individual
+-- fica null e vale o número do convite, que é o mesmo do convidado.
+alter table convidados add column if not exists whatsapp text;
 
 create index if not exists idx_convidados_convite on convidados (convite_id);
 create index if not exists idx_convidados_status  on convidados (status);

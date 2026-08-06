@@ -16,6 +16,16 @@
 //   Tia Nilza                      <- sem número, convite entregue na mão
 //
 // O convite é individual. Um casal são duas linhas e dois links.
+//
+// PADRINHOS são a exceção. Linha começando com * é um convite de padrinhos:
+// os dois nomes na mesma linha, separados por +, um link só para o casal.
+//
+//   * João Pereira + Maria Souza; 62 98888 7777
+//   * Tia Nilza                    <- padrinho sozinho também vale
+//
+// O separador é + e não " e " de propósito: existe gente chamada "Ana e
+// Silva", e uma lista que erra o nome de um padrinho é pior do que uma
+// lista com um sinal estranho no meio.
 // =====================================================================
 
 import { randomInt } from "node:crypto";
@@ -75,35 +85,58 @@ const saida = [
 ];
 
 let semNumero = 0;
+let padrinhos = 0;
 
-for (const linha of linhas) {
-  const [nomeBruto, telBruto] = linha.split(/[;,]/, 2);
-  const nome = (nomeBruto ?? "").trim();
-  if (!nome) throw new Error(`linha sem nome: "${linha}"`);
+for (const bruta of linhas) {
+  const ehPadrinho = bruta.startsWith("*");
+  const linha = ehPadrinho ? bruta.slice(1).trim() : bruta;
 
-  const chave = nome.toLowerCase();
-  if (vistos.has(chave)) throw new Error(`nome repetido na lista: "${nome}"`);
-  vistos.add(chave);
+  const [nomesBrutos, telBruto] = linha.split(/[;,]/, 2);
+  const nomes = (nomesBrutos ?? "")
+    .split("+")
+    .map((n) => n.trim())
+    .filter(Boolean);
+
+  if (nomes.length === 0) throw new Error(`linha sem nome: "${bruta}"`);
+  if (!ehPadrinho && nomes.length > 1) {
+    throw new Error(`só convite de padrinhos aceita mais de um nome: "${bruta}"`);
+  }
+
+  for (const nome of nomes) {
+    const chave = nome.toLowerCase();
+    if (vistos.has(chave)) throw new Error(`nome repetido na lista: "${nome}"`);
+    vistos.add(chave);
+  }
 
   const tel = normalizarTelefone(telBruto);
   if (!tel) semNumero++;
+  if (ehPadrinho) padrinhos++;
 
   const codigo = gerarCodigo(usados);
+  const tipo = ehPadrinho ? "padrinhos" : "individual";
 
-  // Idempotente pelo nome: rodar duas vezes não cria a pessoa duas vezes.
+  // Idempotente pelos nomes: rodar duas vezes não cria a pessoa duas vezes.
   // Sem isso, um "não sei se já rodei" vira 220 convites e dois links por
   // convidado — e ninguém descobre até alguém receber o segundo.
+  //
+  // A checagem olha todos os nomes da linha: se qualquer um deles já existe,
+  // o convite inteiro é pulado. Meio convite de padrinhos — um nome dentro e
+  // o outro fora — seria pior do que nenhum.
   saida.push(
-    `-- ${nome}  ->  /rsvp/${codigo}`,
-    "with novo as (",
-    `  select ${aspas(nome)}::text as nome, ${tel ? aspas(tel) : "null"}::text as zap`,
+    `-- ${nomes.join(" + ")}  ->  /rsvp/${codigo}${ehPadrinho ? "  (padrinhos)" : ""}`,
+    "with novos as (",
+    "  select * from (values",
+    nomes.map((n) => `    (${aspas(n)}::text)`).join(",\n"),
+    "  ) as t(nome)",
     "), c as (",
-    "  insert into convites (codigo, whatsapp)",
-    `  select ${aspas(codigo)}, novo.zap from novo`,
-    "   where not exists (select 1 from convidados where lower(nome) = lower(novo.nome))",
+    "  insert into convites (codigo, whatsapp, tipo)",
+    `  select ${aspas(codigo)}, ${tel ? aspas(tel) : "null"}, ${aspas(tipo)}`,
+    "   where not exists (",
+    "     select 1 from convidados g join novos n on lower(g.nome) = lower(n.nome)",
+    "   )",
     "  returning id",
     ")",
-    "insert into convidados (convite_id, nome) select c.id, novo.nome from c, novo;",
+    "insert into convidados (convite_id, nome) select c.id, novos.nome from c, novos;",
     "",
   );
 }
@@ -113,5 +146,6 @@ console.log(saida.join("\n"));
 
 console.error(
   `${linhas.length} convite(s) gerado(s)` +
+    (padrinhos ? `, ${padrinhos} de padrinhos` : "") +
     (semNumero ? `, ${semNumero} sem número de WhatsApp` : ""),
 );

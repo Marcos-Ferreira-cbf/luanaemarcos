@@ -14,9 +14,9 @@ type Convidado = {
  * O nome já vem do banco: ninguém digita quem é. O convidado só toca em
  * "Vou" ou "Não vou" — um toque, e acabou.
  *
- * Hoje o convite é individual, então a lista tem sempre uma pessoa. O
- * componente continua aceitando várias porque o custo é zero e a alternativa
- * seria reescrevê-lo se algum convite voltar a valer para duas.
+ * O convite individual traz uma pessoa; o de padrinhos traz o casal. Aí cada
+ * um responde o seu — um pode aceitar e o outro não poder, e o casal precisa
+ * saber disso separado.
  *
  * Enviar exige que todos tenham respondido. Meio convite respondido é pior
  * do que nenhum: o casal não sabe se o silêncio é "não vem" ou "esqueceu".
@@ -25,10 +25,12 @@ export default function FormularioRsvp({
   codigo,
   convidados,
   precisaTransporte,
+  padrinhos = false,
 }: {
   codigo: string;
   convidados: Convidado[];
   precisaTransporte: boolean;
+  padrinhos?: boolean;
 }) {
   const [respostas, setRespostas] = useState<Record<string, "vem" | "nao_vem">>(() =>
     Object.fromEntries(
@@ -82,12 +84,18 @@ export default function FormularioRsvp({
     return (
       <div style={{ marginTop: "2.5rem" }}>
         <p className="titulo" style={{ fontSize: "clamp(1.8rem,7vw,2.4rem)" }}>
-          {vem > 0 ? "Que bom. Até lá." : "Obrigado por avisar."}
+          {vem === 0
+            ? "Obrigado por avisar."
+            : padrinhos
+              ? "Que alegria. Obrigado!"
+              : "Que bom. Até lá."}
         </p>
         <p className="texto">
-          {vem > 0
-            ? `Anotamos ${vem === 1 ? "uma presença" : `${vem} presenças`}. Se mudar alguma coisa, é só voltar neste link.`
-            : "Vamos sentir sua falta. Se mudar de ideia, volte neste link."}
+          {vem === 0
+            ? "Vamos sentir sua falta. Se mudar de ideia, volte neste link."
+            : padrinhos
+              ? "Já estamos comemorando aqui. A gente combina o resto pessoalmente — e se mudar alguma coisa, é só voltar neste link."
+              : `Anotamos ${vem === 1 ? "uma presença" : `${vem} presenças`}. Se mudar alguma coisa, é só voltar neste link.`}
         </p>
         <button
           className="btn btn--linha"
@@ -114,20 +122,24 @@ export default function FormularioRsvp({
               )}
             </p>
           )}
-          <div className="pessoa__opcoes" role="group" aria-label={`${c.nome} vem?`}>
+          <div
+            className="pessoa__opcoes"
+            role="group"
+            aria-label={padrinhos ? `${c.nome} aceita?` : `${c.nome} vem?`}
+          >
             <button
               className="escolha"
               aria-pressed={respostas[c.id] === "vem"}
               onClick={() => setRespostas((r) => ({ ...r, [c.id]: "vem" }))}
             >
-              Vou
+              {padrinhos ? "Aceito" : "Vou"}
             </button>
             <button
               className="escolha"
               aria-pressed={respostas[c.id] === "nao_vem"}
               onClick={() => setRespostas((r) => ({ ...r, [c.id]: "nao_vem" }))}
             >
-              Não vou
+              {padrinhos ? "Não vou poder" : "Não vou"}
             </button>
           </div>
           {respostas[c.id] === "vem" && (

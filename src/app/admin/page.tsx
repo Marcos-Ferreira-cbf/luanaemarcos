@@ -41,13 +41,16 @@ async function carregar() {
        order by (p.agradecido_em is not null), p.pago_em desc
     `),
 
-    // Um convite, um convidado — o join é 1-para-1, sem agregação.
+    // Convite individual é 1-para-1, sem agregação. Padrinhos ficam de fora
+    // porque são 1-para-2: aqui eles virariam duas linhas com o mesmo código.
+    // Eles têm tela própria, /admin/padrinhos, onde o par aparece junto.
     db.query<ConviteResumo>(`
       select c.codigo, c.precisa_transporte, c.whatsapp, c.convite_enviado_em,
              g.nome, g.status, g.crianca,
              g.restricao_alimentar as restricao
         from convites c
         join convidados g on g.convite_id = c.id
+       where c.tipo = 'individual'
        order by (c.convite_enviado_em is not null), g.nome
     `),
   ]);

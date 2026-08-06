@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { reais } from "@/lib/formato";
@@ -166,6 +167,19 @@ export default function PainelAdmin({
           >
             Presença ({convites.length})
           </button>
+        </div>
+
+        {/* Padrinhos e modelos são telas, não abas: uma cadastra, a outra é
+            para o casal escolher a arte. Nenhuma das duas é lista de trabalho
+            do dia a dia, e misturá-las com as abas empurraria as três que são
+            para fora da tela no celular. */}
+        <div className="painel__atalhos">
+          <Link className="btn btn--linha btn--curto" href="/admin/padrinhos">
+            Padrinhos
+          </Link>
+          <Link className="btn btn--linha btn--curto" href="/admin/modelos">
+            Modelos de convite
+          </Link>
         </div>
 
         {aba === "presentes" ? (

@@ -1082,9 +1082,10 @@ textarea.folha__campo {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* A foto é vertical e o corte é deitado: puxar o enquadramento para cima
-     mantém os dois rostos dentro do recorte. */
-  object-position: center 38%;
+  /* A foto é vertical e o corte é deitado. O casal está um pouco acima do
+     meio do quadro, então o recorte sobe junto — centralizar cortaria as
+     cabeças e sobraria grama. */
+  object-position: center 42%;
   display: block;
 }
 .retrato__salve {
@@ -1344,4 +1345,40 @@ textarea.folha__campo {
 .cartao__pessoa[data-status="nao_vem"] {
   text-decoration: line-through;
   color: var(--onda);
+}
+
+/* Atalhos para as telas que não são aba: padrinhos e modelos. */
+.painel__atalhos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0.9rem 0 0.5rem;
+}
+.painel__atalhos .btn {
+  text-decoration: none;
+}
+
+/* Cadastro de par. Os dois nomes ficam um debaixo do outro, mas cada linha
+   carrega nome e número juntos — é a informação que anda em par de verdade,
+   porque um nome sem número é um padrinho que nunca recebe o pedido. */
+.par {
+  margin-top: 1.5rem;
+  padding: 1.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+.par__linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+.par__linha .restricao {
+  margin-top: 0;
+}
+.par__nome {
+  flex: 1 1 12rem;
+}
+.par__zap {
+  flex: 1 1 10rem;
 }

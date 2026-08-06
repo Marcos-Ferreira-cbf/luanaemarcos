@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Folhagem from "./Folhagem";
 
-export type ModeloConvite = "folhagem" | "faixa" | "retrato";
+export type ModeloConvite = "folhagem" | "faixa" | "retrato" | "padrinhos";
 
 /** Um lugar só para o que muda se a festa mudar de hora ou de endereço. */
 const FESTA = {
@@ -21,8 +21,9 @@ const FESTA = {
  * O convite propriamente dito: uma peça para guardar, imprimir ou postar.
  *
  * São três modelos com o mesmo conteúdo — quem, quando, onde — e três roupas
- * diferentes. Trocar o `modelo` troca a peça inteira sem mexer em nada em
- * volta, então dá para decidir depois e mudar de ideia sem custo.
+ * diferentes. O escolhido é o `retrato`, e é ele que sai por padrão; os
+ * outros dois continuam de pé em /convite/modelos, porque trocar o `modelo`
+ * troca a peça inteira sem mexer em nada em volta.
  *
  * O versículo ficou de fora dos três: dentro de uma A4 ele empurrava o
  * endereço para cima do desenho, e ele já abre a página inicial. Convite de
@@ -34,7 +35,7 @@ const FESTA = {
  */
 export default function Convite({
   nome,
-  modelo = "folhagem",
+  modelo = "retrato",
 }: {
   nome: string;
   modelo?: ModeloConvite;
@@ -74,10 +75,10 @@ export default function Convite({
     <>
       {modelo === "faixa" ? (
         <PecaFaixa nome={nome} />
-      ) : modelo === "retrato" ? (
-        <PecaRetrato nome={nome} />
-      ) : (
+      ) : modelo === "folhagem" ? (
         <PecaFolhagem nome={nome} />
+      ) : (
+        <PecaRetrato nome={nome} padrinhos={modelo === "padrinhos"} />
       )}
 
       <div className="convite__acoes">
@@ -216,32 +217,55 @@ function PecaFaixa({ nome }: { nome: string }) {
 
 /**
  * Uma foto grande no alto e tipografia sóbria embaixo: os nomes em caixa
- * alta com serifa, a data numa caixinha e o endereço em letras miúdas.
- * É o modelo que menos depende de desenho e mais depende da foto — se a foto
- * for boa, esse é o mais bonito dos três impresso.
+ * alta com serifa, a data numa caixinha e o endereço em letras miúdas. É o
+ * modelo escolhido, e é o que todo convidado recebe.
+ *
+ * O convite de padrinhos é a mesma peça com outro texto — de propósito. Quem
+ * é padrinho vai receber o convite de casamento também, e duas artes
+ * diferentes fariam parecer dois casamentos. O que muda é o que precisa
+ * mudar: ali é um pedido, não um aviso, e ele é feito ao casal junto.
  */
-function PecaRetrato({ nome }: { nome: string }) {
+function PecaRetrato({ nome, padrinhos = false }: { nome: string; padrinhos?: boolean }) {
   return (
     <article
       className="convite convite--retrato"
-      aria-label={`Convite de casamento para ${nome}`}
+      aria-label={
+        padrinhos
+          ? `Convite para serem padrinhos, para ${nome}`
+          : `Convite de casamento para ${nome}`
+      }
     >
       <div className="retrato__foto">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/fotos/foto-03.webp"
-          alt="Luana e Marcos frente a frente na praia"
+          src="/fotos/foto-10.webp"
+          alt="Luana e Marcos no mirante, olhando o mar"
           loading="lazy"
         />
       </div>
 
-      <p className="retrato__salve">• salve a data •</p>
+      <p className="retrato__salve">
+        {padrinhos ? "• vocês aceitam? •" : "• salve a data •"}
+      </p>
 
       <p className="retrato__texto">
-        Com a bênção de Deus e de nossas famílias,
-        <br />
-        convidamos <strong>{nome}</strong> para celebrar conosco
-        <br />o nosso casamento.
+        {padrinhos ? (
+          <>
+            Tem gente que a gente escolhe para o dia,
+            <br />e gente que a gente escolhe para a vida.
+            <br />
+            <strong>{nome}</strong>, queremos vocês ao nosso lado
+            <br />
+            como nossos padrinhos.
+          </>
+        ) : (
+          <>
+            Com a bênção de Deus e de nossas famílias,
+            <br />
+            convidamos <strong>{nome}</strong> para celebrar conosco
+            <br />o nosso casamento.
+          </>
+        )}
       </p>
 
       <h1 className="retrato__nomes">

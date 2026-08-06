@@ -22,6 +22,7 @@ const ENSAIO = [
   { arquivo: "foto-07.webp", alt: "Marcos abraçando Luana por trás" },
   { arquivo: "foto-08.webp", alt: "Os dois caminhando de mãos dadas" },
   { arquivo: "foto-09.webp", alt: "Os dois frente a frente na praia" },
+  { arquivo: "foto-10.webp", alt: "Luana e Marcos no mirante, olhando o mar" },
 ];
 
 /**

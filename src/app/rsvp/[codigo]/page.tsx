@@ -24,22 +24,27 @@ export default async function PaginaRsvp({
   const { codigo } = await params;
   const normalizado = decodeURIComponent(codigo).trim().toUpperCase().slice(0, 12);
 
-  // Um convite, um convidado. O nome na tela é o dele — o convite não guarda
-  // nome nenhum, justamente para não existirem duas versões do mesmo.
+  // Quase todo convite tem um convidado só; o de padrinhos tem o casal. O
+  // convite não guarda nome nenhum, justamente para não existirem duas
+  // versões do mesmo — quem tem nome é o convidado.
   const { rows } = await db.query<{
     id: string;
     codigo: string;
+    tipo: "individual" | "padrinhos";
     precisa_transporte: boolean;
-    convidado: Convidado;
+    convidados: Convidado[];
   }>(
-    `select c.id, c.codigo, c.precisa_transporte,
-            json_build_object(
-              'id', g.id, 'nome', g.nome, 'crianca', g.crianca,
-              'status', g.status, 'restricao_alimentar', g.restricao_alimentar
-            ) as convidado
+    `select c.id, c.codigo, c.tipo, c.precisa_transporte,
+            json_agg(
+              json_build_object(
+                'id', g.id, 'nome', g.nome, 'crianca', g.crianca,
+                'status', g.status, 'restricao_alimentar', g.restricao_alimentar
+              ) order by g.nome
+            ) as convidados
        from convites c
        join convidados g on g.convite_id = c.id
-      where c.codigo = $1`,
+      where c.codigo = $1
+      group by c.id`,
     [normalizado],
   );
 
@@ -47,6 +52,13 @@ export default async function PaginaRsvp({
   // convidaria a tentar de novo até acertar algum.
   if (rows.length === 0) notFound();
   const convite = rows[0];
+  const padrinhos = convite.tipo === "padrinhos";
+
+  // "João Pereira e Maria Souza" — o pedido é aos dois, então a peça traz os
+  // dois. Com um nome só, o "e" nunca aparece.
+  const nomes = convite.convidados.map((g) => g.nome);
+  const nome =
+    nomes.length > 1 ? `${nomes.slice(0, -1).join(", ")} e ${nomes.at(-1)}` : nomes[0];
 
   return (
     <main className="bloco bloco--escuro" style={{ minHeight: "100svh" }}>
@@ -61,21 +73,23 @@ export default async function PaginaRsvp({
         {/* A caligrafia entra só aqui: é a única tela do site que a usa, e
             pendurá-la no layout faria a home baixar uma fonte que não mostra. */}
         <div className={script.variable} style={{ marginTop: "2rem" }}>
-          <Convite nome={convite.convidado.nome} />
+          <Convite nome={nome} modelo={padrinhos ? "padrinhos" : "retrato"} />
         </div>
 
         <h2 className="titulo" style={{ marginTop: "4rem", fontSize: "clamp(1.8rem,7vw,2.4rem)" }}>
-          Você vem?
+          {padrinhos ? "E aí, aceitam?" : "Você vem?"}
         </h2>
         <p className="texto">
-          Dá para mudar depois, é só voltar neste mesmo link — a gente fecha o almoço em
-          10 de setembro.
+          {padrinhos
+            ? "Cada um responde o seu — e dá para mudar depois, é só voltar neste mesmo link."
+            : "Dá para mudar depois, é só voltar neste mesmo link — a gente fecha o almoço em 10 de setembro."}
         </p>
 
         <FormularioRsvp
           codigo={convite.codigo}
-          convidados={[convite.convidado]}
+          convidados={convite.convidados}
           precisaTransporte={convite.precisa_transporte}
+          padrinhos={padrinhos}
         />
       </div>
     </main>
