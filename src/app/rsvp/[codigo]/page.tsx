@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import Convite from "@/components/Convite";
 import FormularioRsvp from "@/components/FormularioRsvp";
 import { db } from "@/lib/db";
 
@@ -53,12 +54,19 @@ export default async function PaginaRsvp({
           ← Marcos &amp; Luana
         </Link>
 
-        <h1 className="titulo" style={{ marginTop: "2rem" }}>
-          {convite.convidado.nome}
-        </h1>
+        {/* O convite vem primeiro e o formulário depois: a pessoa abriu o link
+            para ver o convite dela, não para responder um questionário. O
+            cartão traz o nome dela, então dispensa o título que havia aqui. */}
+        <div style={{ marginTop: "2rem" }}>
+          <Convite nome={convite.convidado.nome} />
+        </div>
+
+        <h2 className="titulo" style={{ marginTop: "4rem", fontSize: "clamp(1.8rem,7vw,2.4rem)" }}>
+          Você vem?
+        </h2>
         <p className="texto">
-          Diga se você vem. Dá para mudar depois, é só voltar neste mesmo link — a gente
-          fecha o almoço em 10 de setembro.
+          Dá para mudar depois, é só voltar neste mesmo link — a gente fecha o almoço em
+          10 de setembro.
         </p>
 
         <FormularioRsvp

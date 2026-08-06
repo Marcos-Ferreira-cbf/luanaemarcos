@@ -31,10 +31,12 @@ function mensagemDeConvite(c: ConviteResumo, site: string): string {
     "",
     "A gente vai casar no dia 10 de outubro, um sábado, em Barro Alto — e queremos muito você lá.",
     "",
-    "Todos os detalhes estão aqui, e é por este link também que você confirma presença:",
+    // O link não é "os detalhes do casamento": é o convite dela, com o nome
+    // dela, para guardar ou postar. Prometer o convite é o que faz clicar.
+    "Clique para ver o seu convite:",
     `${site}/rsvp/${c.codigo}`,
     "",
-    "O link é seu, com o seu nome já cadastrado. É só confirmar.",
+    "É só seu, com o seu nome. Dá para imprimir, guardar de recordação — e é por ali mesmo que você confirma presença.",
     "",
     "Com carinho, Marcos e Luana 💛",
   ].join("\n");

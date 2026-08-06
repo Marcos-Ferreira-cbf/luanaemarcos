@@ -708,6 +708,174 @@ textarea.folha__campo {
   outline-offset: 2px;
 }
 
+/* =====================================================================
+   o convite — a peça que a pessoa guarda
+
+   Fica sobre o bloco escuro do /rsvp de propósito: papel claro sobre fundo
+   escuro lê como cartão em cima da mesa, e é a mesma imagem que sai na
+   impressão. Tudo aqui é tipografia; não há foto, porque foto de fundo em
+   convite impresso come tinta, some no papel comum e briga com o texto.
+   ===================================================================== */
+.convite {
+  background: var(--luz);
+  color: var(--tinta);
+  text-align: center;
+  padding: clamp(2.5rem, 9vw, 4rem) clamp(1.5rem, 7vw, 3rem);
+  /* A moldura dupla é o truque do convite de papel: a linha de fora encosta
+     na borda, a de dentro dá o respiro. Uma linha só fica burocrática. */
+  border: 1px solid var(--areia);
+  outline: 1px solid var(--onda);
+  outline-offset: -10px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+}
+
+.convite__alto,
+.convite__frase {
+  font-size: 0.9rem;
+  font-style: italic;
+  font-family: var(--serif);
+  color: var(--onda);
+}
+.convite__alto {
+  font-size: 0.72rem;
+  font-style: normal;
+  font-family: var(--sans);
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+}
+
+.convite__nomes {
+  font-family: var(--serif);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  /* Cabe em "Marcos & Luana" numa linha até em tela de 320px. */
+  font-size: clamp(2.6rem, 13vw, 4.2rem);
+}
+.convite__nomes em {
+  display: block;
+  font-size: 0.42em;
+  color: var(--onda);
+  margin: 0.15em 0;
+}
+
+/* Filete com losango no meio: o separador dos convites de papel, feito só
+   com borda e um pseudo-elemento girado — nada de imagem para carregar. */
+.convite__ornamento {
+  position: relative;
+  width: min(62%, 15rem);
+  height: 1px;
+  margin: 2rem auto;
+  background: var(--areia);
+}
+.convite__ornamento::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  background: var(--onda);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.convite__convidado {
+  font-family: var(--serif);
+  font-size: clamp(1.7rem, 8vw, 2.5rem);
+  line-height: 1.15;
+  margin: 0.6rem 0;
+}
+
+.convite__data {
+  font-family: var(--serif);
+  font-size: clamp(1.15rem, 5vw, 1.5rem);
+  margin-bottom: 1.6rem;
+}
+
+.convite__onde p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--tinta) 92%, transparent);
+  margin-bottom: 0.7rem;
+}
+/* A hora em mono e em bloco alinha 09h30 embaixo de 12h00 mesmo com o texto
+   ao lado quebrando em duas linhas. */
+.convite__hora {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  color: var(--onda);
+}
+
+.convite__cidade {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--onda);
+  margin-top: 1.8rem;
+}
+
+.convite__verso {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--onda);
+  margin-top: 2.4rem;
+  padding-top: 1.8rem;
+  border-top: 1px solid var(--areia);
+}
+.convite__ref {
+  display: block;
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  margin-top: 0.6rem;
+}
+
+.convite__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.4rem;
+}
+.convite__acoes .btn {
+  flex: 1 1 12rem;
+}
+
+/* Imprimir tem que sair o cartão, e só o cartão: sem o cabeçalho, sem o
+   formulário de confirmação e sem os dois botões que ninguém quer no papel.
+   A sombra e a cor de fundo saem também — economiza tinta e some no papel. */
+@media print {
+  body {
+    background: #fff;
+  }
+  body * {
+    visibility: hidden;
+  }
+  .convite,
+  .convite * {
+    visibility: visible;
+  }
+  .convite {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    box-shadow: none;
+    border: none;
+    outline-offset: -14px;
+  }
+  .convite__acoes {
+    display: none;
+  }
+}
+
 /* revelação suave ao rolar */
 .surge {
   opacity: 0;
