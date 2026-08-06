@@ -8,9 +8,13 @@
 # o Container Apps valida a posse consultando a internet, não o seu Azure. Os
 # registros já estão na zona (A no apex, CNAME no www, asuid TXT nos dois).
 #
-# São dois passos, nesta ordem: o certificado gerenciado nasce no ambiente e
-# só depois o hostname é amarrado a ele. Fazer o bind antes deixa o domínio
-# respondendo sem TLS.
+# São dois passos, e a ordem não é a que parece. O 'bind' cria o certificado
+# gerenciado sozinho, mas a emissão exige que o hostname JÁ esteja no app —
+# e quem o coloca lá é o 'add'. Chamar só o bind falha com
+# RequireCustomHostnameInEnvironment, que descreve exatamente isso.
+#
+# Entre um e outro o domínio responde sem TLS (bindingType Disabled). São
+# alguns minutos; o certificado pode levar até 20.
 
 param(
   [string]$Grupo = 'rg-casamento-luanaemarcos',
@@ -31,31 +35,20 @@ if ($soa -and $soa -notlike '*azure-dns*') {
 
 # O apex valida por TXT — CNAME na raiz não existe. O www valida por CNAME.
 $alvos = @(
-  @{ host = $Dominio;       metodo = 'TXT';   cert = 'cert-apex' },
-  @{ host = "www.$Dominio"; metodo = 'CNAME'; cert = 'cert-www' }
+  @{ host = $Dominio;       metodo = 'TXT' },
+  @{ host = "www.$Dominio"; metodo = 'CNAME' }
 )
 
 foreach ($a in $alvos) {
-  Write-Host "`n== $($a.host) =="
+  Write-Host "`n== $($a.host) (validação por $($a.metodo)) =="
 
-  $id = az containerapp env certificate list -g $Grupo -n $Ambiente `
-        --query "[?name=='$($a.cert)'].id | [0]" -o tsv 2>$null
+  Write-Host "  colocando o hostname no app..."
+  az containerapp hostname add -g $Grupo -n $App --hostname $a.host -o none
 
-  if (-not $id) {
-    Write-Host "  criando certificado gerenciado (validação por $($a.metodo))..."
-    az containerapp env certificate create `
-      -g $Grupo -n $Ambiente `
-      --hostname $a.host --validation-method $a.metodo `
-      --certificate-name $a.cert -o none
-    $id = az containerapp env certificate list -g $Grupo -n $Ambiente `
-          --query "[?name=='$($a.cert)'].id | [0]" -o tsv
-  } else {
-    Write-Host "  certificado já existe"
-  }
-
-  Write-Host "  amarrando o hostname..."
-  az containerapp hostname bind -g $Grupo -n $App -e $Ambiente `
-    --hostname $a.host --certificate $id -o none
+  Write-Host "  emitindo o certificado gerenciado (pode levar até 20 min)..."
+  az containerapp hostname bind `
+    -g $Grupo -n $App -e $Ambiente `
+    --hostname $a.host --validation-method $a.metodo -o none
 }
 
 Write-Host "`nResultado:"
