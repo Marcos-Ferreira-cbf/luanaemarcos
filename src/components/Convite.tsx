@@ -23,8 +23,8 @@ export default function Convite({ nome }: { nome: string }) {
 
   async function compartilhar() {
     const dados = {
-      title: "Marcos & Luana · 10.10.2026",
-      text: "Fui convidado para o casamento de Marcos e Luana!",
+      title: "Luana & Marcos · 10.10.2026",
+      text: "Fui convidado para o casamento de Luana e Marcos!",
       url: "https://marcoseluana.social.br",
     };
 
@@ -58,9 +58,9 @@ export default function Convite({ nome }: { nome: string }) {
 
         <div className="convite__miolo">
           <h1 className="convite__nomes">
-            <span>Marcos</span>
-            <span className="convite__e">&amp;</span>
             <span>Luana</span>
+            <span className="convite__e">&amp;</span>
+            <span>Marcos</span>
           </h1>
 
           <p className="convite__chamada">

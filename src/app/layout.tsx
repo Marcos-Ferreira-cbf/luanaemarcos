@@ -30,11 +30,11 @@ const mono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Marcos & Luana · 10.10.2026",
+  title: "Luana & Marcos · 10.10.2026",
   description:
-    "Casamento de Marcos e Luana. Sábado, 10 de outubro de 2026, em Barro Alto, Goiás.",
+    "Casamento de Luana e Marcos. Sábado, 10 de outubro de 2026, em Barro Alto, Goiás.",
   openGraph: {
-    title: "Marcos & Luana · 10.10.2026",
+    title: "Luana & Marcos · 10.10.2026",
     description: "Diante de Deus, o sim que vale para sempre.",
     locale: "pt_BR",
     type: "website",

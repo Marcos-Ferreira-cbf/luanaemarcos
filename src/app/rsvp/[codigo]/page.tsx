@@ -52,7 +52,7 @@ export default async function PaginaRsvp({
     <main className="bloco bloco--escuro" style={{ minHeight: "100svh" }}>
       <div className="col">
         <Link href="/" className="rotulo" style={{ textDecoration: "none" }}>
-          ← Marcos &amp; Luana
+          ← Luana &amp; Marcos
         </Link>
 
         {/* O convite vem primeiro e o formulário depois: a pessoa abriu o link

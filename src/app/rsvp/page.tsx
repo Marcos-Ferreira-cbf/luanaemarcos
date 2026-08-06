@@ -13,7 +13,7 @@ export default function PaginaCodigo() {
     <main className="bloco bloco--escuro" style={{ minHeight: "100svh" }}>
       <div className="col">
         <Link href="/" className="rotulo" style={{ textDecoration: "none" }}>
-          ← Marcos &amp; Luana
+          ← Luana &amp; Marcos
         </Link>
 
         <h1 className="titulo" style={{ marginTop: "2rem" }}>

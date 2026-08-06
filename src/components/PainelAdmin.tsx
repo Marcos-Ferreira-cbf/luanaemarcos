@@ -38,7 +38,7 @@ function mensagemDeConvite(c: ConviteResumo, site: string): string {
     "",
     "É só seu, com o seu nome. Dá para imprimir, guardar de recordação — e é por ali mesmo que você confirma presença.",
     "",
-    "Com carinho, Marcos e Luana 💛",
+    "Com carinho, Luana e Marcos 💛",
   ].join("\n");
 }
 
@@ -125,7 +125,7 @@ export default function PainelAdmin({
     <main className="painel">
       <div className="col">
         <div className="painel__topo">
-          <p className="rotulo">Painel · Marcos &amp; Luana</p>
+          <p className="rotulo">Painel · Luana &amp; Marcos</p>
           <button className="painel__sair" onClick={sair}>
             sair
           </button>

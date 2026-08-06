@@ -15,8 +15,8 @@ const SITIO = "https://maps.app.goo.gl/JGumRb3QheYLotWR7";
 const WHATSAPP = "https://wa.me/5562996325652";
 
 const ENSAIO = [
-  { arquivo: "foto-04.webp", alt: "Marcos e Luana na praia" },
-  { arquivo: "foto-05.webp", alt: "Marcos e Luana abraçados" },
+  { arquivo: "foto-04.webp", alt: "Luana e Marcos na praia" },
+  { arquivo: "foto-05.webp", alt: "Luana e Marcos abraçados" },
   { arquivo: "foto-06.webp", alt: "Luana sorrindo abraçada a Marcos" },
   { arquivo: "foto-07.webp", alt: "Marcos abraçando Luana por trás" },
   { arquivo: "foto-08.webp", alt: "Os dois caminhando de mãos dadas" },
@@ -60,7 +60,7 @@ export default async function Pagina() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/fotos/foto-01.webp"
-            alt="Marcos e Luana caminhando de mãos dadas na praia ao pôr do sol"
+            alt="Luana e Marcos caminhando de mãos dadas na praia ao pôr do sol"
             fetchPriority="high"
           />
         </div>
@@ -68,7 +68,7 @@ export default async function Pagina() {
         <div className="capa__texto">
           <p className="capa__rotulo">10 de outubro de 2026 · Barro Alto, GO</p>
           <h1 className="capa__nomes serifa">
-            Marcos <em>&amp;</em> Luana
+            Luana <em>&amp;</em> Marcos
           </h1>
           <Contagem />
         </div>

@@ -17,7 +17,7 @@ export default async function PaginaEntrar() {
     >
       <div className="col">
         <p className="rotulo">Painel</p>
-        <h1 className="titulo">Marcos &amp; Luana</h1>
+        <h1 className="titulo">Luana &amp; Marcos</h1>
         <FormularioEntrar />
       </div>
     </main>
