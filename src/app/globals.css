@@ -488,7 +488,6 @@ img {
   display: flex;
   gap: 0.6rem;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
   padding: 0 var(--marg) 0.5rem;
   scrollbar-width: none;
 }
@@ -500,9 +499,63 @@ img {
   flex: 0 0 74%;
   max-width: 340px;
   aspect-ratio: 2/3;
-  scroll-snap-align: center;
   overflow: hidden;
   border-radius: 2px;
+}
+/* No celular uma foto por vez ocupa a tela; na tela grande, uma foto de 74%
+   viraria um pôster e a fila inteira sumiria fora do quadro. Tamanho fixo e
+   menor deixa cinco ou seis à vista — que é o ponto de uma fila girando. */
+@media (min-width: 760px) {
+  .rail__item {
+    flex: 0 0 230px;
+    max-width: none;
+  }
+}
+.rail__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
+
+/* O trilho gira sozinho via JS mexendo no scrollLeft. Encaixe magnético
+   (scroll-snap) brigaria com isso — a cada quadro o navegador tentaria
+   recentralizar a foto e o giro sairia aos trancos. Sem giro, sem briga. */
+.galeria {
+  position: relative;
+}
+.galeria__trilho {
+  cursor: grab;
+}
+.galeria__setas {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 1.4rem;
+}
+.galeria__seta {
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: 50%;
+  border: 1px solid rgba(44, 53, 42, 0.25);
+  background: transparent;
+  color: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.25s, border-color 0.25s;
+}
+.galeria__seta:hover {
+  background: rgba(44, 53, 42, 0.07);
+  border-color: rgba(44, 53, 42, 0.5);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rail {
+    scroll-snap-type: x mandatory;
+  }
+  .rail__item {
+    scroll-snap-align: center;
+  }
 }
 
 /* ============ rodapé ============ */
@@ -893,6 +946,209 @@ textarea.folha__campo {
   flex: 1 1 12rem;
 }
 
+/* ---------------------------------------------------------------------
+   modelo 2 — faixa de fotos
+
+   Fundo de papel bege, três fotos em tira e a data em números vazados por
+   cima. As fotos passam por um filtro comum (preto e branco levemente
+   quente): assim qualquer foto nova que entre na tira já chega combinando
+   com as outras duas, sem precisar de edição antes.
+   --------------------------------------------------------------------- */
+.convite--faixa {
+  --tinta: #4b4037;
+  --suave: #8a7962;
+  background: #efe9e1;
+  color: var(--tinta);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6% 7% 7%;
+}
+.faixa__tira {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.4cqw;
+}
+.faixa__tira img {
+  width: 100%;
+  aspect-ratio: 2 / 3.5;
+  object-fit: cover;
+  display: block;
+  /* O escurecido não é estilo, é legibilidade: o ensaio é todo em alta-luz e
+     sem isso o número vazado de branco some dentro da foto. */
+  filter: grayscale(1) sepia(0.24) contrast(1.04) brightness(0.92);
+}
+.faixa__numeros {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: center;
+  justify-items: center;
+  font-family: var(--serif);
+  font-size: 19cqw;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  /* Vazado, não sólido: por cima de foto clara ou escura o contorno branco
+     continua legível, e o número não tapa os rostos. */
+  color: transparent;
+  -webkit-text-stroke: 0.5cqw rgba(255, 255, 255, 0.98);
+  text-shadow: 0 0 1.6cqw rgba(0, 0, 0, 0.3);
+}
+.faixa__nomes {
+  font-family: var(--fonte-script), cursive;
+  font-weight: 400;
+  font-size: 15cqw;
+  line-height: 1;
+  color: var(--suave);
+  margin-top: 6cqw;
+}
+.faixa__nomes em {
+  font-style: normal;
+  font-size: 0.6em;
+}
+.faixa__convidam {
+  font-family: var(--sans);
+  font-size: 2.5cqw;
+  font-weight: 600;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  margin-top: 2cqw;
+}
+.faixa__para {
+  font-family: var(--serif);
+  font-size: 4.4cqw;
+  line-height: 1.25;
+  margin-top: 5cqw;
+}
+.faixa__paraRotulo {
+  display: block;
+  font-family: var(--sans);
+  font-size: 2.3cqw;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--suave);
+  margin-bottom: 1cqw;
+}
+.faixa__hora {
+  font-family: var(--serif);
+  font-size: 3.6cqw;
+  margin-top: 4cqw;
+}
+.faixa__hora strong {
+  font-weight: 400;
+  font-size: 1.25em;
+}
+.faixa__local {
+  font-family: var(--serif);
+  font-size: 3.2cqw;
+  line-height: 1.6;
+  margin-top: 4cqw;
+}
+.faixa__cidade {
+  font-family: var(--sans);
+  font-size: 2.3cqw;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--suave);
+  margin-top: 1.6cqw;
+}
+
+/* ---------------------------------------------------------------------
+   modelo 3 — salve a data
+
+   Uma foto grande e tipografia sóbria: nomes em caixa alta, data numa
+   caixinha, endereço em letras miúdas. É o que menos depende de desenho e
+   mais depende da foto.
+   --------------------------------------------------------------------- */
+.convite--retrato {
+  --tinta: #3c3a35;
+  --suave: #857762;
+  background: #faf7f2;
+  color: var(--tinta);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 7% 10% 8%;
+}
+.retrato__foto {
+  overflow: hidden;
+  aspect-ratio: 5 / 4;
+}
+.retrato__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* A foto é vertical e o corte é deitado: puxar o enquadramento para cima
+     mantém os dois rostos dentro do recorte. */
+  object-position: center 38%;
+  display: block;
+}
+.retrato__salve {
+  font-family: var(--sans);
+  font-size: 2.4cqw;
+  font-weight: 600;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--suave);
+  margin-top: 5cqw;
+}
+.retrato__texto {
+  font-family: var(--serif);
+  font-size: 3.3cqw;
+  line-height: 1.65;
+  margin-top: 3.5cqw;
+}
+.retrato__texto strong {
+  font-weight: 400;
+  font-style: italic;
+}
+.retrato__nomes {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3cqw;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 7.6cqw;
+  line-height: 1.1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 5cqw;
+}
+/* Fio com um losango no meio: o ornamento clássico desses convites, feito
+   com gradiente para não pesar um SVG a mais. */
+.retrato__fleuron {
+  flex: 1;
+  height: 1.4cqw;
+  background:
+    linear-gradient(currentColor, currentColor) left center / 100% 1px no-repeat,
+    conic-gradient(from 45deg, currentColor 0 100%) center / 1.4cqw 1.4cqw no-repeat;
+  opacity: 0.55;
+}
+.retrato__data {
+  align-self: center;
+  font-family: var(--sans);
+  font-size: 2.9cqw;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  padding: 2.4cqw 5cqw;
+  margin-top: 5cqw;
+  border: 1px solid rgba(60, 58, 53, 0.35);
+}
+.retrato__local {
+  font-family: var(--sans);
+  font-size: 2.3cqw;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  line-height: 2.1;
+  color: var(--suave);
+  margin-top: 5cqw;
+}
+
 /* Imprimir tem que sair o cartão, e só o cartão: sem o cabeçalho, sem o
    formulário de confirmação e sem os dois botões que ninguém quer no papel.
    A sombra sai junto — sombra impressa vira uma tarja cinza. */
@@ -925,6 +1181,13 @@ textarea.folha__campo {
   }
   .convite__acoes {
     display: none;
+  }
+  /* Na tela de comparação são três cartões na mesma página: empilhados no
+     canto 0,0 eles sairiam um por cima do outro. Aqui cada um leva a sua
+     folha. */
+  .comparar .convite {
+    position: static;
+    break-after: page;
   }
 }
 

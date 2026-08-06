@@ -1,5 +1,6 @@
 import Contagem from "@/components/Contagem";
 import CodigoConvite from "@/components/CodigoConvite";
+import Galeria from "@/components/Galeria";
 import Gravata from "@/components/Gravata";
 import ListaPresentes from "@/components/ListaPresentes";
 import Surge from "@/components/Surge";
@@ -197,19 +198,12 @@ export default async function Pagina() {
       <Gravata cotas={cotasGravata} mare={mare} />
 
       {/* ============ galeria ============ */}
-      <section className="bloco" style={{ paddingBottom: "calc(var(--ar) * .6)" }}>
+      <section id="ensaio" className="bloco" style={{ paddingBottom: "calc(var(--ar) * .6)" }}>
         <Surge className="col" style={{ marginBottom: "2rem" }}>
           <p className="rotulo">O ensaio</p>
           <h2 className="titulo">A gente.</h2>
         </Surge>
-        <div className="rail">
-          {ENSAIO.map((f) => (
-            <div className="rail__item" key={f.arquivo}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={`/fotos/${f.arquivo}`} alt={f.alt} loading="lazy" />
-            </div>
-          ))}
-        </div>
+        <Galeria fotos={ENSAIO} />
       </section>
 
       {/* ============ ajuda ============ */}
