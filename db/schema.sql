@@ -20,18 +20,43 @@
 -- ---------------------------------------------------------------------
 -- Convites
 --
--- O código é o que separa convidado de curioso. Um convite por família,
--- com os nomes já cadastrados: ninguém digita quem é, só confirma.
+-- O código é o que separa convidado de curioso. **Um convite por pessoa**:
+-- cada convidado tem o seu código, o seu link e o seu número de WhatsApp.
+-- Um casal recebe dois links, um cada.
+--
+-- Por isso o convite não guarda nome nenhum — quem tem nome é o convidado,
+-- na tabela abaixo, e todo convite tem exatamente um. Guardar o nome nos
+-- dois lugares seria duas versões da mesma verdade, e uma delas ficaria
+-- desatualizada na primeira correção de grafia.
 -- ---------------------------------------------------------------------
 create table if not exists convites (
   id                    uuid primary key default gen_random_uuid(),
   codigo                text not null unique,
-  familia               text not null,
-  limite_acompanhantes  integer not null default 0 check (limite_acompanhantes >= 0),
+  whatsapp              text,
+  convite_enviado_em    timestamptz,
   precisa_transporte    boolean not null default false,
   observacao            text,
   criado_em             timestamptz not null default now()
 );
+
+-- O número e a marca de "convite entregue" chegaram depois, com a aba
+-- Convites do painel. Mesma regra do resto do arquivo: coluna nova entra por
+-- alter, uma por linha, para o schema seguir aplicável em banco vazio e em
+-- banco em produção.
+--
+-- whatsapp em E.164 sem o +, igual a pedidos.whatsapp_pagador: 5562996325652.
+-- É o formato que o wa.me aceita direto, sem tratamento no cliente.
+alter table convites add column if not exists whatsapp           text;
+alter table convites add column if not exists convite_enviado_em timestamptz;
+
+-- Sobras do modelo por família, que morreu quando o convite virou individual.
+-- As duas tabelas estavam vazias, então isto não é migração — é limpeza.
+alter table convites drop column if exists familia;
+alter table convites drop column if exists limite_acompanhantes;
+
+-- A fila de envio do convite, espelhando idx_pedidos_a_agradecer.
+create index if not exists idx_convites_a_enviar on convites (criado_em)
+  where convite_enviado_em is null;
 
 create table if not exists convidados (
   id                  uuid primary key default gen_random_uuid(),

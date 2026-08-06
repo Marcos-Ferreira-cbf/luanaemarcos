@@ -22,27 +22,22 @@ export default async function PaginaRsvp({
   const { codigo } = await params;
   const normalizado = decodeURIComponent(codigo).trim().toUpperCase().slice(0, 12);
 
+  // Um convite, um convidado. O nome na tela é o dele — o convite não guarda
+  // nome nenhum, justamente para não existirem duas versões do mesmo.
   const { rows } = await db.query<{
     id: string;
     codigo: string;
-    familia: string;
     precisa_transporte: boolean;
-    convidados: Convidado[];
+    convidado: Convidado;
   }>(
-    `select c.id, c.codigo, c.familia, c.precisa_transporte,
-            coalesce(
-              json_agg(
-                json_build_object(
-                  'id', g.id, 'nome', g.nome, 'crianca', g.crianca,
-                  'status', g.status, 'restricao_alimentar', g.restricao_alimentar
-                ) order by g.crianca, g.nome
-              ) filter (where g.id is not null),
-              '[]'
-            ) as convidados
+    `select c.id, c.codigo, c.precisa_transporte,
+            json_build_object(
+              'id', g.id, 'nome', g.nome, 'crianca', g.crianca,
+              'status', g.status, 'restricao_alimentar', g.restricao_alimentar
+            ) as convidado
        from convites c
-       left join convidados g on g.convite_id = c.id
-      where c.codigo = $1
-      group by c.id`,
+       join convidados g on g.convite_id = c.id
+      where c.codigo = $1`,
     [normalizado],
   );
 
@@ -59,16 +54,16 @@ export default async function PaginaRsvp({
         </Link>
 
         <h1 className="titulo" style={{ marginTop: "2rem" }}>
-          {convite.familia}
+          {convite.convidado.nome}
         </h1>
         <p className="texto">
-          Marque quem vem. Dá para mudar depois, é só voltar neste mesmo link — a gente
+          Diga se você vem. Dá para mudar depois, é só voltar neste mesmo link — a gente
           fecha o almoço em 10 de setembro.
         </p>
 
         <FormularioRsvp
           codigo={convite.codigo}
-          convidados={convite.convidados}
+          convidados={[convite.convidado]}
           precisaTransporte={convite.precisa_transporte}
         />
       </div>

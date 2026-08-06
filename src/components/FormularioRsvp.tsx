@@ -11,8 +11,12 @@ type Convidado = {
 };
 
 /**
- * Os nomes já vêm do banco: ninguém digita quem é. O convidado só toca em
- * "Vou" ou "Não vou" — dois toques por pessoa, e acabou.
+ * O nome já vem do banco: ninguém digita quem é. O convidado só toca em
+ * "Vou" ou "Não vou" — um toque, e acabou.
+ *
+ * Hoje o convite é individual, então a lista tem sempre uma pessoa. O
+ * componente continua aceitando várias porque o custo é zero e a alternativa
+ * seria reescrevê-lo se algum convite voltar a valer para duas.
  *
  * Enviar exige que todos tenham respondido. Meio convite respondido é pior
  * do que nenhum: o casal não sabe se o silêncio é "não vem" ou "esqueceu".
@@ -100,12 +104,16 @@ export default function FormularioRsvp({
     <div style={{ marginTop: "2.5rem" }}>
       {convidados.map((c) => (
         <div className="pessoa" key={c.id}>
-          <p className="pessoa__nome">
-            {c.nome}
-            {c.crianca && (
-              <span style={{ opacity: 0.55, fontSize: ".85rem" }}> · criança</span>
-            )}
-          </p>
+          {/* Com uma pessoa só, o nome já é o título da página — repeti-lo
+              aqui não informa nada. */}
+          {convidados.length > 1 && (
+            <p className="pessoa__nome">
+              {c.nome}
+              {c.crianca && (
+                <span style={{ opacity: 0.55, fontSize: ".85rem" }}> · criança</span>
+              )}
+            </p>
+          )}
           <div className="pessoa__opcoes" role="group" aria-label={`${c.nome} vem?`}>
             <button
               className="escolha"
@@ -169,9 +177,11 @@ export default function FormularioRsvp({
       >
         {enviando
           ? "Salvando…"
-          : faltam > 0
-            ? `Falta responder por ${faltam}`
-            : "Confirmar"}
+          : faltam === 0
+            ? "Confirmar"
+            : convidados.length === 1
+              ? "Escolha uma das duas"
+              : `Falta responder por ${faltam}`}
       </button>
     </div>
   );

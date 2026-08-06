@@ -20,6 +20,26 @@ function mensagemDeAgradecimento(p: PedidoPago): string {
   return linhas.join("\n");
 }
 
+/**
+ * O convite já escrito, com o link pessoal dentro. O convite é individual:
+ * cada pessoa recebe o seu, e um casal recebe dois.
+ */
+function mensagemDeConvite(c: ConviteResumo, site: string): string {
+  const primeiro = c.nome.trim().split(/\s+/)[0];
+  return [
+    `Oi, ${primeiro}!`,
+    "",
+    "A gente vai casar no dia 10 de outubro, um sábado, em Barro Alto — e queremos muito você lá.",
+    "",
+    "Todos os detalhes estão aqui, e é por este link também que você confirma presença:",
+    `${site}/rsvp/${c.codigo}`,
+    "",
+    "O link é seu, com o seu nome já cadastrado. É só confirmar.",
+    "",
+    "Com carinho, Marcos e Luana 💛",
+  ].join("\n");
+}
+
 function quando(iso: string): string {
   return new Date(iso).toLocaleString("pt-BR", {
     day: "2-digit",
@@ -42,17 +62,20 @@ export default function PainelAdmin({
   resumo,
   pagos,
   convites,
+  site,
 }: {
   resumo: Resumo;
   pagos: PedidoPago[];
   convites: ConviteResumo[];
+  site: string;
 }) {
   const router = useRouter();
-  const [aba, setAba] = useState<"presentes" | "presenca">("presentes");
+  const [aba, setAba] = useState<"presentes" | "presenca" | "convites">("presentes");
   const [ocupado, setOcupado] = useState<string | null>(null);
   const [, iniciar] = useTransition();
 
   const aAgradecer = Number(resumo.a_agradecer);
+  const aEnviar = Number(resumo.convites_a_enviar);
 
   async function marcar(pedidoId: string, desfazer: boolean) {
     setOcupado(pedidoId);
@@ -68,6 +91,20 @@ export default function PainelAdmin({
     }
   }
 
+  async function marcarConvite(codigo: string, desfazer: boolean) {
+    setOcupado(codigo);
+    try {
+      await fetch("/api/admin/convite-enviado", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ codigo, desfazer }),
+      });
+      iniciar(() => router.refresh());
+    } finally {
+      setOcupado(null);
+    }
+  }
+
   async function sair() {
     await fetch("/api/admin/entrar", { method: "DELETE" });
     router.push("/admin/entrar");
@@ -76,11 +113,9 @@ export default function PainelAdmin({
 
   const restricoes = useMemo(
     () =>
-      convites.flatMap((c) =>
-        c.pessoas
-          .filter((p) => p.status === "vem" && p.restricao?.trim())
-          .map((p) => `${p.nome}: ${p.restricao}`),
-      ),
+      convites
+        .filter((c) => c.status === "vem" && c.restricao?.trim())
+        .map((c) => `${c.nome}: ${c.restricao}`),
     [convites],
   );
 
@@ -97,7 +132,13 @@ export default function PainelAdmin({
         <div className="painel__numeros">
           <Numero valor={reais(Number(resumo.arrecadado_centavos))} rotulo="arrecadado" />
           <Numero valor={resumo.vem} rotulo="confirmados" />
-          <Numero valor={resumo.sem_resposta} rotulo="sem resposta" />
+          {/* Enquanto houver convite para mandar, esse é o número que importa;
+              "sem resposta" só faz sentido depois que todo mundo recebeu. */}
+          {aEnviar > 0 ? (
+            <Numero valor={String(aEnviar)} rotulo="a convidar" />
+          ) : (
+            <Numero valor={resumo.sem_resposta} rotulo="sem resposta" />
+          )}
           <Numero valor={String(aAgradecer)} rotulo="a agradecer" />
         </div>
 
@@ -108,6 +149,13 @@ export default function PainelAdmin({
             onClick={() => setAba("presentes")}
           >
             Presentes ({pagos.length})
+          </button>
+          <button
+            className="painel__aba"
+            aria-pressed={aba === "convites"}
+            onClick={() => setAba("convites")}
+          >
+            Convites ({convites.length})
           </button>
           <button
             className="painel__aba"
@@ -173,6 +221,58 @@ export default function PainelAdmin({
               );
             })}
           </>
+        ) : aba === "convites" ? (
+          <>
+            {convites.length === 0 && (
+              <p className="texto" style={{ marginTop: "2rem" }}>
+                Nenhum convite cadastrado ainda.
+              </p>
+            )}
+
+            {convites.map((c) => {
+              const enviado = c.convite_enviado_em !== null;
+              return (
+                <div className="cartao" key={c.codigo} data-feito={enviado}>
+                  <div className="cartao__linha">
+                    <span className="cartao__nome">{c.nome}</span>
+                    <span className="cartao__codigo">{c.codigo}</span>
+                  </div>
+                  <p className="cartao__meta">
+                    {enviado
+                      ? `convite enviado em ${quando(c.convite_enviado_em!)}`
+                      : "ainda não recebeu o convite"}
+                    {c.status === "vem" && " · já confirmou"}
+                    {c.status === "nao_vem" && " · disse que não vem"}
+                  </p>
+
+                  <div className="cartao__acoes">
+                    {c.whatsapp ? (
+                      <a
+                        className="btn btn--linha btn--curto"
+                        href={`https://wa.me/${c.whatsapp}?text=${encodeURIComponent(
+                          mensagemDeConvite(c, site),
+                        )}`}
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        {enviado ? "Abrir conversa" : "Enviar convite"}
+                      </a>
+                    ) : (
+                      <span className="cartao__meta">sem número — convide pessoalmente</span>
+                    )}
+
+                    <button
+                      className="btn btn--linha btn--curto"
+                      disabled={ocupado === c.codigo}
+                      onClick={() => marcarConvite(c.codigo, enviado)}
+                    >
+                      {ocupado === c.codigo ? "…" : enviado ? "Desmarcar" : "Já enviei"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </>
         ) : (
           <>
             {restricoes.length > 0 && (
@@ -194,21 +294,15 @@ export default function PainelAdmin({
 
             {convites.map((c) => (
               <div className="cartao" key={c.codigo}>
-                <div className="cartao__linha">
-                  <span className="cartao__nome">{c.familia}</span>
-                  <span className="cartao__codigo">{c.codigo}</span>
-                </div>
-                {c.pessoas.map((p) => (
-                  <p className="cartao__pessoa" key={p.nome} data-status={p.status}>
-                    <span>
-                      {p.nome}
-                      {p.crianca && <span className="cartao__meta"> · criança</span>}
-                    </span>
-                    <span>
-                      {p.status === "vem" ? "vem" : p.status === "nao_vem" ? "não vem" : "—"}
-                    </span>
-                  </p>
-                ))}
+                <p className="cartao__pessoa" data-status={c.status}>
+                  <span>
+                    {c.nome}
+                    {c.crianca && <span className="cartao__meta"> · criança</span>}
+                  </span>
+                  <span>
+                    {c.status === "vem" ? "vem" : c.status === "nao_vem" ? "não vem" : "—"}
+                  </span>
+                </p>
                 {c.precisa_transporte && (
                   <p className="cartao__meta">precisa de carona para o sítio</p>
                 )}

@@ -10,24 +10,18 @@ function normalizar(codigo: string): string {
   return codigo.trim().toUpperCase().slice(0, 12);
 }
 
-/** Devolve a família e os nomes já cadastrados. Ninguém digita quem é. */
+/** Devolve o convidado daquele código. Ninguém digita quem é. */
 export async function GET(_req: Request, ctx: Contexto) {
   const { codigo } = await ctx.params;
 
   const { rows } = await db.query(
-    `select c.id, c.familia, c.limite_acompanhantes,
-            coalesce(
-              json_agg(
-                json_build_object(
-                  'id', g.id, 'nome', g.nome, 'crianca', g.crianca, 'status', g.status
-                ) order by g.crianca, g.nome
-              ) filter (where g.id is not null),
-              '[]'
-            ) as convidados
+    `select c.id, c.precisa_transporte,
+            json_build_object(
+              'id', g.id, 'nome', g.nome, 'crianca', g.crianca, 'status', g.status
+            ) as convidado
        from convites c
-       left join convidados g on g.convite_id = c.id
-      where c.codigo = $1
-      group by c.id`,
+       join convidados g on g.convite_id = c.id
+      where c.codigo = $1`,
     [normalizar(codigo)],
   );
 

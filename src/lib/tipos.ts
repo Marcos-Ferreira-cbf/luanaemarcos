@@ -33,6 +33,7 @@ export type Resumo = {
   nao_vem: string;
   sem_resposta: string;
   com_transporte: string;
+  convites_a_enviar: string;
 };
 
 export type PedidoPago = {
@@ -46,16 +47,17 @@ export type PedidoPago = {
   presentes: string;
 };
 
+/** Um convite é uma pessoa: o nome vem do convidado, não do convite. */
 export type ConviteResumo = {
   codigo: string;
-  familia: string;
+  nome: string;
+  status: "pendente" | "vem" | "nao_vem";
+  crianca: boolean;
+  restricao: string | null;
   precisa_transporte: boolean;
-  pessoas: {
-    nome: string;
-    status: "pendente" | "vem" | "nao_vem";
-    crianca: boolean;
-    restricao: string | null;
-  }[];
+  /** E.164 sem o +. Null quando não há número cadastrado. */
+  whatsapp: string | null;
+  convite_enviado_em: string | null;
 };
 
 /** O que abre a folha de pagamento. */

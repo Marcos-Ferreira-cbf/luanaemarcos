@@ -20,7 +20,8 @@ async function carregar() {
         (select count(*) from convidados where status = 'vem')                            as vem,
         (select count(*) from convidados where status = 'nao_vem')                        as nao_vem,
         (select count(*) from convidados where status = 'pendente')                       as sem_resposta,
-        (select count(*) from convites where precisa_transporte)                          as com_transporte
+        (select count(*) from convites where precisa_transporte)                          as com_transporte,
+        (select count(*) from convites where convite_enviado_em is null)                  as convites_a_enviar
     `),
 
     // Quem ainda não recebeu obrigado vem primeiro: é a fila de trabalho da
@@ -40,21 +41,14 @@ async function carregar() {
        order by (p.agradecido_em is not null), p.pago_em desc
     `),
 
+    // Um convite, um convidado — o join é 1-para-1, sem agregação.
     db.query<ConviteResumo>(`
-      select c.codigo, c.familia, c.precisa_transporte,
-             coalesce(
-               json_agg(
-                 json_build_object(
-                   'nome', g.nome, 'status', g.status,
-                   'crianca', g.crianca, 'restricao', g.restricao_alimentar
-                 ) order by g.crianca, g.nome
-               ) filter (where g.id is not null),
-               '[]'
-             ) as pessoas
+      select c.codigo, c.precisa_transporte, c.whatsapp, c.convite_enviado_em,
+             g.nome, g.status, g.crianca,
+             g.restricao_alimentar as restricao
         from convites c
-        left join convidados g on g.convite_id = c.id
-       group by c.id
-       order by c.familia
+        join convidados g on g.convite_id = c.id
+       order by (c.convite_enviado_em is not null), g.nome
     `),
   ]);
 
@@ -69,5 +63,11 @@ export default async function PaginaAdmin() {
   if (!(await temSessao())) redirect("/admin/entrar");
 
   const { resumo, pagos, convites } = await carregar();
-  return <PainelAdmin resumo={resumo} pagos={pagos} convites={convites} />;
+
+  // O link do convite tem que ser o público, não o host da requisição: a Luana
+  // pode abrir o painel pela URL temporária do Azure, e o convidado não vai
+  // receber aquilo. APP_URL é a mesma env que alimenta o notification_url.
+  const site = (process.env.APP_URL || "https://marcoseluana.social.br").replace(/\/$/, "");
+
+  return <PainelAdmin resumo={resumo} pagos={pagos} convites={convites} site={site} />;
 }
