@@ -53,11 +53,7 @@ export default async function PaginaConvitePar({
         <h1 className="titulo" style={{ marginTop: "2rem" }}>
           {par.nomes}
         </h1>
-        <p className="texto">
-          Imprimir ou salvar em PDF sai só esta peça, em A4. O código do convite não
-          aparece nela de propósito — ele é a chave da confirmação, e esta arte vai
-          ser encaminhada.
-        </p>
+        <p className="texto">Imprimir ou salvar em PDF sai só esta peça, em A4.</p>
 
         <div className={script.variable} style={{ marginTop: "2rem" }}>
           <Convite nome={par.nomes} modelo="padrinhos" />

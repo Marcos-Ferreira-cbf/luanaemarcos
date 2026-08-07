@@ -62,9 +62,20 @@ export default async function PaginaRsvp({
           ← Luana &amp; Marcos
         </Link>
 
-        {/* O convite vem primeiro e o formulário depois: a pessoa abriu o link
-            para ver o convite dela, não para responder um questionário. O
-            cartão traz o nome dela, então dispensa o título que havia aqui. */}
+        {/* O nome tem que estar acima da peça, não só dentro dela.
+            Dentro, ele fica embaixo da foto grande — no celular isso é uma
+            rolagem inteira depois do topo, e quem abre o link vê primeiro uma
+            foto que podia ser de qualquer convite. O link é pessoal e precisa
+            parecer pessoal na primeira tela, antes de qualquer coisa. */}
+        <p className="rotulo" style={{ marginTop: "2.5rem" }}>
+          {padrinhos ? "Um pedido para" : "Convite de"}
+        </p>
+        <h1 className="titulo" style={{ marginTop: ".4rem" }}>
+          {nome}
+        </h1>
+
+        {/* O convite vem antes do formulário: a pessoa abriu o link para ver o
+            convite dela, não para responder um questionário. */}
         {/* A caligrafia entra só aqui: é a única tela do site que a usa, e
             pendurá-la no layout faria a home baixar uma fonte que não mostra. */}
         <div className={script.variable} style={{ marginTop: "2rem" }}>
