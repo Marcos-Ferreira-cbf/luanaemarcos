@@ -4,6 +4,7 @@ import Convite from "@/components/Convite";
 import FormularioRsvp from "@/components/FormularioRsvp";
 import { db } from "@/lib/db";
 import { script } from "@/lib/fontes";
+import { juntarNomes } from "@/lib/nomes";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -54,11 +55,8 @@ export default async function PaginaRsvp({
   const convite = rows[0];
   const padrinhos = convite.tipo === "padrinhos";
 
-  // "João Pereira e Maria Souza" — o pedido é aos dois, então a peça traz os
-  // dois. Com um nome só, o "e" nunca aparece.
-  const nomes = convite.convidados.map((g) => g.nome);
-  const nome =
-    nomes.length > 1 ? `${nomes.slice(0, -1).join(", ")} e ${nomes.at(-1)}` : nomes[0];
+  // O pedido é aos dois, então a peça traz os dois.
+  const nome = juntarNomes(convite.convidados.map((g) => g.nome));
 
   return (
     <main className="bloco bloco--escuro" style={{ minHeight: "100svh" }}>

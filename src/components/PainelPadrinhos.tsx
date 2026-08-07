@@ -147,6 +147,14 @@ export default function PainelPadrinhos({ pares, site }: { pares: Par[]; site: s
           <span className="rotulo">Padrinhos ({pares.length})</span>
         </div>
 
+        {pares.length > 0 && (
+          <div className="painel__atalhos">
+            <Link className="btn btn--linha btn--curto" href="/admin/padrinhos/convites">
+              Ver as {pares.length} peças
+            </Link>
+          </div>
+        )}
+
         <div className="par">
           <p className="rotulo" style={{ marginBottom: "1rem" }}>
             Novo par
@@ -249,6 +257,13 @@ export default function PainelPadrinhos({ pares, site }: { pares: Par[]; site: s
                     </span>
                   ),
                 )}
+
+                <Link
+                  className="btn btn--linha btn--curto"
+                  href={`/admin/padrinhos/convites/${par.codigo}`}
+                >
+                  Ver a peça
+                </Link>
 
                 <button
                   className="btn btn--linha btn--curto"
