@@ -50,6 +50,8 @@ export type PedidoPago = {
 /** Um convite é uma pessoa: o nome vem do convidado, não do convite. */
 export type ConviteResumo = {
   codigo: string;
+  /** A pessoa, não o convite — é a linha que a correção de nome e número altera. */
+  convidado_id: string;
   nome: string;
   status: "pendente" | "vem" | "nao_vem";
   crianca: boolean;

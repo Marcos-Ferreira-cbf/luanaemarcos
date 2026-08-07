@@ -1403,3 +1403,49 @@ textarea.folha__campo {
 .par__zap {
   flex: 1 1 10rem;
 }
+
+/* Texto que vira campo ao ser clicado. Ele mora dentro de linhas de leitura —
+   o nome do convidado, a meta do cartão — então herda a fonte do lugar em vez
+   de impor a sua: se parecesse um botão, a lista viraria uma barra de
+   ferramentas em vez de continuar sendo uma lista. O tracejado embaixo é a
+   única pista, e só de perto. */
+.editavel {
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  padding: 0.15rem 0;
+  background: none;
+  border: 0;
+  border-bottom: 1px dashed rgba(31, 42, 47, 0.28);
+  cursor: text;
+}
+.editavel:hover {
+  border-bottom-color: var(--onda);
+}
+.editavel:focus-visible {
+  outline: 2px solid var(--onda);
+  outline-offset: 2px;
+}
+/* Sem número também é clicável — é justamente o caso em que se quer digitar. */
+.editavel--vazio {
+  color: var(--onda);
+  font-style: italic;
+}
+.editavel__campo {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+/* Dentro de uma lista o campo não pode ter a altura de um formulário: 52px por
+   linha empurraria o cartão inteiro para fora da tela do celular. */
+.editavel__campo .par__campo {
+  min-height: 2.4rem;
+  padding: 0.35rem 0.6rem;
+  width: 11rem;
+  max-width: 100%;
+}
+.editavel__erro {
+  font-size: 0.8rem;
+  color: #a03030;
+}

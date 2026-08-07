@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
-import { reais } from "@/lib/formato";
+import CampoEditavel from "@/components/CampoEditavel";
+import { editarConvidado } from "@/lib/editar";
+import { reais, telefoneBonito } from "@/lib/formato";
 import type { ConviteResumo, PedidoPago, Resumo } from "@/lib/tipos";
 
 /** O obrigado já escrito. A Luana lê, ajusta se quiser, e envia. */
@@ -106,6 +108,14 @@ export default function PainelAdmin({
     } finally {
       setOcupado(null);
     }
+  }
+
+  // O refresh só depois do salvo: recarregar antes devolveria o valor antigo e
+  // pareceria que a edição não pegou.
+  async function editar(id: string, dados: { nome?: string; whatsapp?: string }) {
+    const problema = await editarConvidado(id, dados);
+    if (!problema) iniciar(() => router.refresh());
+    return problema;
   }
 
   async function sair() {
@@ -250,7 +260,15 @@ export default function PainelAdmin({
               return (
                 <div className="cartao" key={c.codigo} data-feito={enviado}>
                   <div className="cartao__linha">
-                    <span className="cartao__nome">{c.nome}</span>
+                    <span className="cartao__nome">
+                      <CampoEditavel
+                        bruto={c.nome}
+                        exibido={c.nome}
+                        vazio="sem nome"
+                        rotulo="Nome"
+                        aoSalvar={(novo) => editar(c.convidado_id, { nome: novo })}
+                      />
+                    </span>
                     <span className="cartao__codigo">{c.codigo}</span>
                   </div>
                   <p className="cartao__meta">
@@ -259,6 +277,17 @@ export default function PainelAdmin({
                       : "ainda não recebeu o convite"}
                     {c.status === "vem" && " · já confirmou"}
                     {c.status === "nao_vem" && " · disse que não vem"}
+                  </p>
+                  <p className="cartao__meta">
+                    WhatsApp:{" "}
+                    <CampoEditavel
+                      bruto={c.whatsapp}
+                      exibido={telefoneBonito(c.whatsapp)}
+                      vazio="sem número"
+                      rotulo={`WhatsApp de ${c.nome}`}
+                      tipo="tel"
+                      aoSalvar={(novo) => editar(c.convidado_id, { whatsapp: novo })}
+                    />
                   </p>
 
                   <div className="cartao__acoes">

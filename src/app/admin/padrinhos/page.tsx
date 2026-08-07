@@ -16,7 +16,8 @@ export default async function PaginaPadrinhos() {
   const { rows } = await db.query<Par>(`
     select c.codigo, (c.convite_enviado_em is not null) as enviado,
            json_agg(json_build_object(
-             'nome', g.nome, 'whatsapp', coalesce(g.whatsapp, c.whatsapp), 'status', g.status
+             'id', g.id, 'nome', g.nome,
+             'whatsapp', coalesce(g.whatsapp, c.whatsapp), 'status', g.status
            ) order by g.nome) as pessoas
       from convites c
       join convidados g on g.convite_id = c.id

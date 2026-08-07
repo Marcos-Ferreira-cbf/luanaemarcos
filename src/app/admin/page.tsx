@@ -45,8 +45,9 @@ async function carregar() {
     // porque são 1-para-2: aqui eles virariam duas linhas com o mesmo código.
     // Eles têm tela própria, /admin/padrinhos, onde o par aparece junto.
     db.query<ConviteResumo>(`
-      select c.codigo, c.precisa_transporte, c.whatsapp, c.convite_enviado_em,
-             g.nome, g.status, g.crianca,
+      select c.codigo, c.precisa_transporte, c.convite_enviado_em,
+             coalesce(g.whatsapp, c.whatsapp) as whatsapp,
+             g.id as convidado_id, g.nome, g.status, g.crianca,
              g.restricao_alimentar as restricao
         from convites c
         join convidados g on g.convite_id = c.id

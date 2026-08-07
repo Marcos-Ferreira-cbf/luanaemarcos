@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Alianças">
+  <!--
+    As duas alianças, desenhadas em vetor em vez de coladas como PNG: o ícone
+    aparece a 16px na aba e a 180px no atalho do celular, e um traço que se
+    ajusta a cada tamanho é o único jeito de não virar borrão no menor deles.
+    Desenhado aqui também resolve a licença — não é arte de banco de imagem.
+
+    Cada anel é desenhado duas vezes: o traço escuro largo por baixo faz o
+    contorno, o traço colorido mais fino por cima faz o ouro. É o que dá o
+    encaixe de um anel na frente do outro sem precisar de máscara.
+  -->
+  <g fill="none">
+    <path d="M39 2h8l4 7-4 7h-8l-4-7z" fill="#eceff1" stroke="#231f20" stroke-width="3.5" stroke-linejoin="round"/>
+    <circle cx="42" cy="36" r="15" stroke="#231f20" stroke-width="11"/>
+    <circle cx="42" cy="36" r="15" stroke="#fcd116" stroke-width="7"/>
+    <circle cx="23" cy="41" r="16" stroke="#231f20" stroke-width="11"/>
+    <circle cx="23" cy="41" r="16" stroke="#f0a010" stroke-width="7"/>
+  </g>
+</svg>

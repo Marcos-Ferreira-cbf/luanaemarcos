@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import CampoEditavel from "@/components/CampoEditavel";
+import { editarConvidado } from "@/lib/editar";
+import { telefoneBonito } from "@/lib/formato";
 
-export type Padrinho = { nome: string; whatsapp: string | null; status: string };
+export type Padrinho = { id: string; nome: string; whatsapp: string | null; status: string };
 export type Par = {
   codigo: string;
   enviado: boolean;
@@ -83,6 +86,14 @@ export default function PainelPadrinhos({ pares, site }: { pares: Par[]; site: s
     } finally {
       setSalvando(false);
     }
+  }
+
+  // O refresh só depois do salvo: recarregar antes devolveria o valor antigo e
+  // pareceria que a edição não pegou.
+  async function editar(id: string, dados: { nome?: string; whatsapp?: string }) {
+    const problema = await editarConvidado(id, dados);
+    if (!problema) iniciar(() => router.refresh());
+    return problema;
   }
 
   async function apagar(codigo: string, nomes: string) {
@@ -176,9 +187,23 @@ export default function PainelPadrinhos({ pares, site }: { pares: Par[]; site: s
               </div>
 
               {par.pessoas.map((p) => (
-                <p className="cartao__pessoa" data-status={p.status} key={p.nome}>
-                  <span>{p.nome}</span>
-                  <span>{rotuloStatus(p)}</span>
+                <p className="cartao__pessoa" data-status={p.status} key={p.id}>
+                  <CampoEditavel
+                    bruto={p.nome}
+                    exibido={p.nome}
+                    vazio="sem nome"
+                    rotulo="Nome"
+                    aoSalvar={(novo) => editar(p.id, { nome: novo })}
+                  />
+                  <CampoEditavel
+                    bruto={p.whatsapp}
+                    exibido={telefoneBonito(p.whatsapp)}
+                    vazio="sem número"
+                    rotulo={`WhatsApp de ${p.nome}`}
+                    tipo="tel"
+                    aoSalvar={(novo) => editar(p.id, { whatsapp: novo })}
+                  />
+                  <span className="cartao__meta">{rotuloStatus(p)}</span>
                 </p>
               ))}
 
