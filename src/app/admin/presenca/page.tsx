@@ -32,8 +32,7 @@ export default async function PaginaPresenca() {
   // uma é o problema N+1 pago à toa numa lista que já está toda na mão.
   const { rows } = await db.query<PresencaPessoa>(`
     select g.id, g.nome, g.status, g.crianca,
-           g.restricao_alimentar as restricao,
-           c.tipo, c.precisa_transporte,
+           c.tipo,
            coalesce(
              (select array_agg(o.nome order by o.nome)
                 from convidados o

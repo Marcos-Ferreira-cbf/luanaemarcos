@@ -8,9 +8,7 @@ export type PresencaPessoa = {
   nome: string;
   status: "pendente" | "vem" | "nao_vem";
   crianca: boolean;
-  restricao: string | null;
   tipo: "individual" | "padrinhos";
-  precisa_transporte: boolean;
   /** Quem mais responde pelo mesmo convite. Vazio no convite individual. */
   com: string[];
 };
@@ -47,10 +45,6 @@ export default function PainelPresenca({ pessoas }: { pessoas: PresencaPessoa[] 
       pendente: pessoas.filter((p) => p.status === "pendente").length,
       todos: pessoas.length,
       criancas: vem.filter((p) => p.crianca).length,
-      // Carona é do convite, não da pessoa: o par pede uma vez e vai junto.
-      // Contar por pessoa dobraria a van.
-      carona: vem.filter((p) => p.precisa_transporte).length,
-      restricoes: vem.filter((p) => p.restricao?.trim()),
     };
   }, [pessoas]);
 
@@ -95,26 +89,6 @@ export default function PainelPresenca({ pessoas }: { pessoas: PresencaPessoa[] 
           ))}
         </div>
 
-        {/* As restrições ficam juntas e só das pessoas que vêm: é o papel que
-            vai para quem cozinha, e restrição de quem não vem é ruído no meio
-            de uma cozinha ocupada. */}
-        {filtro === "vem" && contas.restricoes.length > 0 && (
-          <div className="cartao">
-            <p className="rotulo">Restrições alimentares ({contas.restricoes.length})</p>
-            {contas.restricoes.map((p) => (
-              <p className="cartao__presente" key={p.id}>
-                {p.nome}: {p.restricao}
-              </p>
-            ))}
-          </div>
-        )}
-
-        {filtro === "vem" && contas.carona > 0 && (
-          <p className="cartao__meta" style={{ marginTop: "1rem" }}>
-            {contas.carona} pessoa(s) confirmada(s) pediram carona para o sítio.
-          </p>
-        )}
-
         {lista.length === 0 ? (
           <p className="texto" style={{ marginTop: "2rem" }}>
             {filtro === "vem"
@@ -134,9 +108,6 @@ export default function PainelPresenca({ pessoas }: { pessoas: PresencaPessoa[] 
                   {p.tipo === "padrinhos" && <span className="cartao__meta"> · padrinho</span>}
                   {p.com.length > 0 && (
                     <span className="cartao__meta"> · com {p.com.join(", ")}</span>
-                  )}
-                  {p.restricao?.trim() && (
-                    <span className="cartao__meta"> · {p.restricao}</span>
                   )}
                 </span>
                 {filtro === "todos" && (

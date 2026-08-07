@@ -7,7 +7,6 @@ type Convidado = {
   nome: string;
   crianca: boolean;
   status: "pendente" | "vem" | "nao_vem";
-  restricao_alimentar: string | null;
 };
 
 /**
@@ -20,16 +19,19 @@ type Convidado = {
  *
  * Enviar exige que todos tenham respondido. Meio convite respondido é pior
  * do que nenhum: o casal não sabe se o silêncio é "não vem" ou "esqueceu".
+ *
+ * Já teve pergunta de carona e de restrição alimentar aqui. As duas saíram: a
+ * tela existe para uma pergunta só — você vem? — e cada campo a mais é uma
+ * chance de a pessoa fechar sem responder nenhuma. Restrição e carona se
+ * resolvem conversando, e o casal vai falar com todo mundo de qualquer jeito.
  */
 export default function FormularioRsvp({
   codigo,
   convidados,
-  precisaTransporte,
   padrinhos = false,
 }: {
   codigo: string;
   convidados: Convidado[];
-  precisaTransporte: boolean;
   padrinhos?: boolean;
 }) {
   const [respostas, setRespostas] = useState<Record<string, "vem" | "nao_vem">>(() =>
@@ -39,10 +41,6 @@ export default function FormularioRsvp({
         .map((c) => [c.id, c.status as "vem" | "nao_vem"]),
     ),
   );
-  const [restricoes, setRestricoes] = useState<Record<string, string>>(() =>
-    Object.fromEntries(convidados.map((c) => [c.id, c.restricao_alimentar ?? ""])),
-  );
-  const [transporte, setTransporte] = useState(precisaTransporte);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [pronto, setPronto] = useState(false);
@@ -58,13 +56,7 @@ export default function FormularioRsvp({
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          precisaTransporte: transporte,
-          respostas: convidados.map((c) => ({
-            id: c.id,
-            status: respostas[c.id],
-            restricaoAlimentar:
-              respostas[c.id] === "vem" ? restricoes[c.id]?.trim() || undefined : undefined,
-          })),
+          respostas: convidados.map((c) => ({ id: c.id, status: respostas[c.id] })),
         }),
       });
       if (!r.ok) {
@@ -142,38 +134,8 @@ export default function FormularioRsvp({
               {padrinhos ? "Não vou poder" : "Não vou"}
             </button>
           </div>
-          {respostas[c.id] === "vem" && (
-            <input
-              className="restricao"
-              placeholder="Alguma restrição alimentar? (opcional)"
-              value={restricoes[c.id] ?? ""}
-              onChange={(e) => setRestricoes((r) => ({ ...r, [c.id]: e.target.value }))}
-            />
-          )}
         </div>
       ))}
-
-      {vem > 0 && (
-        <label
-          style={{
-            display: "flex",
-            gap: ".8rem",
-            alignItems: "center",
-            marginTop: "1.6rem",
-            cursor: "pointer",
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={transporte}
-            onChange={(e) => setTransporte(e.target.checked)}
-            style={{ width: "1.15rem", height: "1.15rem", accentColor: "var(--luz)" }}
-          />
-          <span className="texto" style={{ margin: 0 }}>
-            Preciso de carona da capela para o sítio
-          </span>
-        </label>
-      )}
 
       {erro && (
         <p className="folha__erro" style={{ marginTop: "1.5rem" }}>

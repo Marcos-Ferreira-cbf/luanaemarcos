@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import CampoEditavel from "@/components/CampoEditavel";
 import { editarConvidado } from "@/lib/editar";
 import { reais, telefoneBonito } from "@/lib/formato";
@@ -124,14 +124,6 @@ export default function PainelAdmin({
     router.push("/admin/entrar");
     router.refresh();
   }
-
-  const restricoes = useMemo(
-    () =>
-      convites
-        .filter((c) => c.status === "vem" && c.restricao?.trim())
-        .map((c) => `${c.nome}: ${c.restricao}`),
-    [convites],
-  );
 
   return (
     <main className="painel">
@@ -320,17 +312,6 @@ export default function PainelAdmin({
           </>
         ) : (
           <>
-            {restricoes.length > 0 && (
-              <div className="cartao">
-                <p className="rotulo">Restrições alimentares</p>
-                {restricoes.map((r) => (
-                  <p className="cartao__presente" key={r}>
-                    {r}
-                  </p>
-                ))}
-              </div>
-            )}
-
             {convites.length === 0 && (
               <p className="texto" style={{ marginTop: "2rem" }}>
                 Nenhum convite cadastrado ainda.
@@ -348,17 +329,13 @@ export default function PainelAdmin({
                     {c.status === "vem" ? "vem" : c.status === "nao_vem" ? "não vem" : "—"}
                   </span>
                 </p>
-                {c.precisa_transporte && (
-                  <p className="cartao__meta">precisa de carona para o sítio</p>
-                )}
               </div>
             ))}
           </>
         )}
 
         <p className="cartao__meta" style={{ margin: "3rem 0" }}>
-          {resumo.pendentes} pedido(s) pendente(s) · {resumo.nao_vem} não vêm ·{" "}
-          {resumo.com_transporte} convite(s) pedindo carona
+          {resumo.pendentes} pedido(s) pendente(s) · {resumo.nao_vem} não vêm
         </p>
       </div>
     </main>

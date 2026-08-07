@@ -20,7 +20,6 @@ async function carregar() {
         (select count(*) from convidados where status = 'vem')                            as vem,
         (select count(*) from convidados where status = 'nao_vem')                        as nao_vem,
         (select count(*) from convidados where status = 'pendente')                       as sem_resposta,
-        (select count(*) from convites where precisa_transporte)                          as com_transporte,
         (select count(*) from convites where convite_enviado_em is null)                  as convites_a_enviar
     `),
 
@@ -45,10 +44,9 @@ async function carregar() {
     // porque são 1-para-2: aqui eles virariam duas linhas com o mesmo código.
     // Eles têm tela própria, /admin/padrinhos, onde o par aparece junto.
     db.query<ConviteResumo>(`
-      select c.codigo, c.precisa_transporte, c.convite_enviado_em,
+      select c.codigo, c.convite_enviado_em,
              coalesce(g.whatsapp, c.whatsapp) as whatsapp,
-             g.id as convidado_id, g.nome, g.status, g.crianca,
-             g.restricao_alimentar as restricao
+             g.id as convidado_id, g.nome, g.status, g.crianca
         from convites c
         join convidados g on g.convite_id = c.id
        where c.tipo = 'individual'

@@ -15,7 +15,7 @@ export async function GET(_req: Request, ctx: Contexto) {
   const { codigo } = await ctx.params;
 
   const { rows } = await db.query(
-    `select c.id, c.precisa_transporte,
+    `select c.id,
             json_build_object(
               'id', g.id, 'nome', g.nome, 'crianca', g.crianca, 'status', g.status
             ) as convidado
@@ -39,8 +39,7 @@ export async function POST(req: Request, ctx: Contexto) {
   const { codigo } = await ctx.params;
 
   let corpo: {
-    respostas?: { id: string; status: "vem" | "nao_vem"; restricaoAlimentar?: string }[];
-    precisaTransporte?: boolean;
+    respostas?: { id: string; status: "vem" | "nao_vem" }[];
   };
   try {
     corpo = await req.json();
@@ -69,20 +68,12 @@ export async function POST(req: Request, ctx: Contexto) {
       const { rowCount } = await c.query(
         `update convidados
             set status = $3,
-                restricao_alimentar = $4,
                 respondido_em = now()
           where id = $1
             and convite_id = $2`,
-        [r.id, conviteId, r.status, r.restricaoAlimentar ?? null],
+        [r.id, conviteId, r.status],
       );
       n += rowCount ?? 0;
-    }
-
-    if (typeof corpo.precisaTransporte === "boolean") {
-      await c.query("update convites set precisa_transporte = $2 where id = $1", [
-        conviteId,
-        corpo.precisaTransporte,
-      ]);
     }
 
     return n;

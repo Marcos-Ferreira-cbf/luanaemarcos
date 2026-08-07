@@ -32,7 +32,6 @@ export type Resumo = {
   vem: string;
   nao_vem: string;
   sem_resposta: string;
-  com_transporte: string;
   convites_a_enviar: string;
 };
 
@@ -55,8 +54,6 @@ export type ConviteResumo = {
   nome: string;
   status: "pendente" | "vem" | "nao_vem";
   crianca: boolean;
-  restricao: string | null;
-  precisa_transporte: boolean;
   /** E.164 sem o +. Null quando não há número cadastrado. */
   whatsapp: string | null;
   convite_enviado_em: string | null;

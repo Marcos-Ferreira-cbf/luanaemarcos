@@ -741,26 +741,6 @@ textarea.folha__campo {
   outline: 2px solid var(--luz);
   outline-offset: 2px;
 }
-.restricao {
-  width: 100%;
-  min-height: var(--toque);
-  margin-top: 0.7rem;
-  padding: 0.8rem 1rem;
-  font-family: var(--sans);
-  font-size: 0.95rem;
-  color: var(--luz);
-  background: transparent;
-  border: 1px solid rgba(250, 248, 245, 0.25);
-  border-radius: 4px;
-}
-.restricao::placeholder {
-  color: rgba(250, 248, 245, 0.35);
-}
-.restricao:focus-visible {
-  outline: 2px solid var(--luz);
-  outline-offset: 2px;
-}
-
 /* =====================================================================
    o convite — a peça que a pessoa guarda
 

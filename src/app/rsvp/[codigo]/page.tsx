@@ -14,7 +14,6 @@ type Convidado = {
   nome: string;
   crianca: boolean;
   status: "pendente" | "vem" | "nao_vem";
-  restricao_alimentar: string | null;
 };
 
 export default async function PaginaRsvp({
@@ -32,14 +31,12 @@ export default async function PaginaRsvp({
     id: string;
     codigo: string;
     tipo: "individual" | "padrinhos";
-    precisa_transporte: boolean;
     convidados: Convidado[];
   }>(
-    `select c.id, c.codigo, c.tipo, c.precisa_transporte,
+    `select c.id, c.codigo, c.tipo,
             json_agg(
               json_build_object(
-                'id', g.id, 'nome', g.nome, 'crianca', g.crianca,
-                'status', g.status, 'restricao_alimentar', g.restricao_alimentar
+                'id', g.id, 'nome', g.nome, 'crianca', g.crianca, 'status', g.status
               ) order by g.nome
             ) as convidados
        from convites c
@@ -86,7 +83,6 @@ export default async function PaginaRsvp({
         <FormularioRsvp
           codigo={convite.codigo}
           convidados={convite.convidados}
-          precisaTransporte={convite.precisa_transporte}
           padrinhos={padrinhos}
         />
       </div>
