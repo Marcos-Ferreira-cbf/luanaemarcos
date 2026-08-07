@@ -1190,6 +1190,29 @@ textarea.folha__campo {
     position: static;
     break-after: page;
   }
+
+  /* A lista de presença também se imprime — é o papel que vai para a cozinha
+     e para a portaria do sítio, onde ninguém vai conferir nome no celular.
+     Sem esta regra ela cairia no `body * { visibility: hidden }` acima e
+     sairia uma folha em branco. */
+  .impressa,
+  .impressa * {
+    visibility: visible;
+  }
+  .impressa {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    max-width: none;
+    padding: 1.5cm;
+  }
+  .impressa__esconder {
+    display: none;
+  }
+  /* Um nome não pode ficar partido entre duas folhas. */
+  .presenca__linha {
+    break-inside: avoid;
+  }
 }
 
 /* revelação suave ao rolar */
@@ -1448,4 +1471,38 @@ textarea.folha__campo {
 .editavel__erro {
   font-size: 0.8rem;
   color: #a03030;
+}
+
+/* Lista de presença. É uma lista numerada de verdade — o número não é enfeite:
+   conferir 110 pessoas na portaria do sítio sem saber em que linha se parou é
+   recomeçar do zero toda vez que alguém interrompe. */
+.presenca {
+  list-style: none;
+  margin: 1.5rem 0 3rem;
+  padding: 0;
+}
+.presenca__linha {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--areia);
+}
+.presenca__n {
+  flex: 0 0 2ch;
+  font-family: var(--serif);
+  font-size: 0.85rem;
+  color: var(--onda);
+  text-align: right;
+}
+.presenca__nome {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.presenca__linha[data-status="nao_vem"] .presenca__nome {
+  text-decoration: line-through;
+  color: var(--onda);
+}
+.presenca__linha[data-status="pendente"] .presenca__nome {
+  color: var(--onda);
 }

@@ -185,6 +185,13 @@ export default function PainelAdmin({
             do dia a dia, e misturá-las com as abas empurraria as três que são
             para fora da tela no celular. */}
         <div className="painel__atalhos">
+          {/* A aba "Presença" aqui do lado só enxerga convite individual — a
+              consulta dela precisa filtrar isso para o par de padrinhos não
+              virar duas linhas na lista de envio. Quem vai à festa não tem
+              tipo, e essa conta mora em tela própria. */}
+          <Link className="btn btn--linha btn--curto" href="/admin/presenca">
+            Lista de presença
+          </Link>
           <Link className="btn btn--linha btn--curto" href="/admin/padrinhos">
             Padrinhos
           </Link>
