@@ -1364,7 +1364,7 @@ textarea.folha__campo {
 .par {
   margin-top: 1.5rem;
   padding: 1.4rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--areia);
   border-radius: 4px;
 }
 .par__linha {
@@ -1373,8 +1373,29 @@ textarea.folha__campo {
   gap: 0.6rem;
   margin-bottom: 0.6rem;
 }
-.par__linha .restricao {
-  margin-top: 0;
+
+/* Os campos do par vivem sobre fundo claro. O .restricao do RSVP é creme
+   sobre bloco escuro — reusá-lo aqui pintava creme sobre creme, com borda
+   clara sobre fundo claro: os quatro campos existiam, do tamanho certo, no
+   lugar certo, e ninguém enxergava nenhum. */
+.par__campo {
+  min-width: 0;
+  min-height: var(--toque);
+  padding: 0.8rem 1rem;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  color: var(--tinta);
+  background: transparent;
+  border: 1px solid rgba(31, 42, 47, 0.22);
+  border-radius: 4px;
+}
+.par__campo::placeholder {
+  color: var(--onda);
+  opacity: 0.75;
+}
+.par__campo:focus-visible {
+  outline: 2px solid var(--onda);
+  outline-offset: 2px;
 }
 .par__nome {
   flex: 1 1 12rem;

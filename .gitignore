@@ -18,7 +18,9 @@ dist/
 # a lista de convidados — o repositório é público, e nome com telefone de
 # 110 pessoas não entra em repositório público
 db/lista.csv
+db/padrinhos.csv
 db/convites.sql
+db/padrinhos.sql
 
 # logs
 *.log

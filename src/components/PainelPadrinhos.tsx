@@ -117,13 +117,13 @@ export default function PainelPadrinhos({ pares, site }: { pares: Par[]; site: s
 
           <div className="par__linha">
             <input
-              className="restricao par__nome"
+              className="par__campo par__nome"
               placeholder="Nome"
               value={n1}
               onChange={(e) => setN1(e.target.value)}
             />
             <input
-              className="restricao par__zap"
+              className="par__campo par__zap"
               placeholder="WhatsApp com DDD"
               inputMode="tel"
               value={w1}
@@ -133,13 +133,13 @@ export default function PainelPadrinhos({ pares, site }: { pares: Par[]; site: s
 
           <div className="par__linha">
             <input
-              className="restricao par__nome"
+              className="par__campo par__nome"
               placeholder="Nome (deixe vazio se for sozinho)"
               value={n2}
               onChange={(e) => setN2(e.target.value)}
             />
             <input
-              className="restricao par__zap"
+              className="par__campo par__zap"
               placeholder="WhatsApp com DDD"
               inputMode="tel"
               value={w2}

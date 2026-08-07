@@ -26,6 +26,16 @@
 // O separador é + e não " e " de propósito: existe gente chamada "Ana e
 // Silva", e uma lista que erra o nome de um padrinho é pior do que uma
 // lista com um sinal estranho no meio.
+//
+// O par pode ter UM número por pessoa, e aí o + separa os dois lados também
+// do lado do telefone, na mesma ordem dos nomes:
+//
+//   * João Pereira + Maria Souza; 62 98888 7777 + 62 97777 6666
+//
+// Isso existe porque o link é do casal mas o WhatsApp não: o mesmo convite
+// vai para os dois celulares, e cada um responde o próprio aceite. Com um
+// número só, ele fica no convite e nenhuma das duas pessoas tem o seu — o
+// painel mostra "sem número" e você acaba mandando na mão.
 // =====================================================================
 
 import { randomInt } from "node:crypto";
@@ -108,8 +118,28 @@ for (const bruta of linhas) {
     vistos.add(chave);
   }
 
-  const tel = normalizarTelefone(telBruto);
-  if (!tel) semNumero++;
+  // Um telefone só vale para a linha inteira; vários seguem a ordem dos
+  // nomes. Qualquer outra contagem é engano de digitação, e engano aqui
+  // manda o pedido de padrinho para o celular errado.
+  const tels = (telBruto ?? "")
+    .split("+")
+    .map((t) => t.trim())
+    .filter(Boolean)
+    .map(normalizarTelefone);
+
+  if (tels.length > 1 && tels.length !== nomes.length) {
+    throw new Error(
+      `${tels.length} telefone(s) para ${nomes.length} nome(s): "${bruta}"`,
+    );
+  }
+
+  // Do convite fica o primeiro que existir: é o número de recado, usado
+  // quando o convidado não tem o próprio.
+  const tel = tels[0] ?? null;
+  const porPessoa = tels.length > 1 ? tels : nomes.map(() => null);
+
+  // Sem número próprio e sem o do convite, não há como mandar o link.
+  semNumero += porPessoa.filter((t) => !t && !tel).length;
   if (ehPadrinho) padrinhos++;
 
   const codigo = gerarCodigo(usados);
@@ -126,8 +156,13 @@ for (const bruta of linhas) {
     `-- ${nomes.join(" + ")}  ->  /rsvp/${codigo}${ehPadrinho ? "  (padrinhos)" : ""}`,
     "with novos as (",
     "  select * from (values",
-    nomes.map((n) => `    (${aspas(n)}::text)`).join(",\n"),
-    "  ) as t(nome)",
+    nomes
+      .map(
+        (n, i) =>
+          `    (${aspas(n)}::text, ${porPessoa[i] ? aspas(porPessoa[i]) : "null"}::text)`,
+      )
+      .join(",\n"),
+    "  ) as t(nome, whatsapp)",
     "), c as (",
     "  insert into convites (codigo, whatsapp, tipo)",
     `  select ${aspas(codigo)}, ${tel ? aspas(tel) : "null"}, ${aspas(tipo)}`,
@@ -136,7 +171,8 @@ for (const bruta of linhas) {
     "   )",
     "  returning id",
     ")",
-    "insert into convidados (convite_id, nome) select c.id, novos.nome from c, novos;",
+    "insert into convidados (convite_id, nome, whatsapp)",
+    "select c.id, novos.nome, novos.whatsapp from c, novos;",
     "",
   );
 }
