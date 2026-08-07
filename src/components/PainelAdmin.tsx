@@ -7,6 +7,7 @@ import CampoEditavel from "@/components/CampoEditavel";
 import { editarConvidado } from "@/lib/editar";
 import { reais, telefoneBonito } from "@/lib/formato";
 import type { ConviteResumo, PedidoPago, Resumo } from "@/lib/tipos";
+import { linkWhatsapp } from "@/lib/whatsapp";
 
 /** O obrigado já escrito. A Luana lê, ajusta se quiser, e envia. */
 function mensagemDeAgradecimento(p: PedidoPago): string {
@@ -221,11 +222,7 @@ export default function PainelAdmin({
                     {p.whatsapp_pagador ? (
                       <a
                         className="btn btn--linha btn--curto"
-                        href={`https://wa.me/${p.whatsapp_pagador}?text=${encodeURIComponent(
-                          mensagemDeAgradecimento(p),
-                        )}`}
-                        target="_blank"
-                        rel="noopener"
+                        href={linkWhatsapp(p.whatsapp_pagador, mensagemDeAgradecimento(p))}
                       >
                         {feito ? "Abrir conversa" : "Escrever obrigado"}
                       </a>
@@ -294,11 +291,7 @@ export default function PainelAdmin({
                     {c.whatsapp ? (
                       <a
                         className="btn btn--linha btn--curto"
-                        href={`https://wa.me/${c.whatsapp}?text=${encodeURIComponent(
-                          mensagemDeConvite(c, site),
-                        )}`}
-                        target="_blank"
-                        rel="noopener"
+                        href={linkWhatsapp(c.whatsapp, mensagemDeConvite(c, site))}
                       >
                         {enviado ? "Abrir conversa" : "Enviar convite"}
                       </a>

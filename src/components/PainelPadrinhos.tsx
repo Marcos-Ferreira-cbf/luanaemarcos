@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import CampoEditavel from "@/components/CampoEditavel";
 import { editarConvidado } from "@/lib/editar";
 import { telefoneBonito } from "@/lib/formato";
+import { linkWhatsapp } from "@/lib/whatsapp";
 
 export type Padrinho = { id: string; nome: string; whatsapp: string | null; status: string };
 export type Par = {
@@ -14,23 +15,48 @@ export type Par = {
   pessoas: Padrinho[];
 };
 
+/** O primeiro nome é como se chama alguém no WhatsApp. Nome inteiro é cobrança. */
+function primeiroNome(nome: string): string {
+  return nome.trim().split(/\s+/)[0];
+}
+
 /**
- * O pedido de padrinho já escrito. É um pedido, não um aviso — por isso ele
- * não abre com data e endereço, abre com o convite de estar junto.
+ * O pedido de padrinho já escrito.
+ *
+ * O convite em si não vem aqui — vem na página do link. É um pedido, e um
+ * pedido dito de corpo inteiro numa mensagem de texto vira aviso; a página
+ * tem a foto, o nome dos dois e o tempo de ler com calma, que é o que a
+ * ocasião pede. A mensagem só precisa fazer a pessoa querer abrir.
+ *
+ * Por isso as frases são curtas e a data vem na primeira linha: no WhatsApp
+ * só as duas primeiras linhas aparecem na notificação, e "a gente casa dia 10
+ * de outubro" já explica sozinho por que vale abrir. Enterrar isso no
+ * parágrafo faria a prévia mostrar só "Oi, Anderson!".
+ *
+ * O par é nomeado inteiro — quem recebe está sendo chamado junto com quem
+ * ama, e ler o nome do outro ali é metade do recado.
  */
-function mensagemDePedido(nome: string, codigo: string, site: string): string {
-  const primeiro = nome.trim().split(/\s+/)[0];
+function mensagemDePedido(p: Padrinho, par: Par, site: string): string {
+  const outro = par.pessoas.find((x) => x.id !== p.id);
+  const juntos = outro
+    ? `para você e para ${primeiroNome(outro.nome)}`
+    : "para você";
+
   return [
-    `Oi, ${primeiro}!`,
+    `Oi, ${primeiroNome(p.nome)}!`,
     "",
-    "A gente vai casar no dia 10 de outubro, e tem uma coisa que a gente queria pedir para vocês antes de contar para qualquer outra pessoa.",
+    "Dia 10 de outubro a gente casa. 💛",
     "",
-    "Abre aqui:",
-    `${site}/rsvp/${codigo}`,
+    `Antes de contar para qualquer outra pessoa, a gente tem um convite ${juntos} — e ele não cabe numa mensagem.`,
     "",
-    "O link é de vocês dois — cada um responde o seu ali mesmo.",
+    outro ? "Abram aqui, com calma:" : "Abre aqui, com calma:",
+    `${site}/rsvp/${par.codigo}`,
     "",
-    "Com carinho, Luana e Marcos 💛",
+    outro
+      ? "O link é de vocês dois: cada um responde o seu ali mesmo."
+      : "É só responder ali mesmo.",
+    "",
+    "Luana e Marcos",
   ].join("\n");
 }
 
@@ -211,18 +237,14 @@ export default function PainelPadrinhos({ pares, site }: { pares: Par[]; site: s
                 {par.pessoas.map((p) =>
                   p.whatsapp ? (
                     <a
-                      key={p.nome}
+                      key={p.id}
                       className="btn btn--linha btn--curto"
-                      href={`https://wa.me/${p.whatsapp}?text=${encodeURIComponent(
-                        mensagemDePedido(p.nome, par.codigo, site),
-                      )}`}
-                      target="_blank"
-                      rel="noopener"
+                      href={linkWhatsapp(p.whatsapp, mensagemDePedido(p, par, site))}
                     >
-                      Pedir a {p.nome.trim().split(/\s+/)[0]}
+                      Pedir a {primeiroNome(p.nome)}
                     </a>
                   ) : (
-                    <span className="cartao__meta" key={p.nome}>
+                    <span className="cartao__meta" key={p.id}>
                       {p.nome} sem número
                     </span>
                   ),
