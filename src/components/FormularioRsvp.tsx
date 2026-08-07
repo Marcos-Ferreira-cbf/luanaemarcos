@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { juntarNomes } from "@/lib/nomes";
 
 type Convidado = {
   id: string;
@@ -17,8 +18,13 @@ type Convidado = {
  * um responde o seu — um pode aceitar e o outro não poder, e o casal precisa
  * saber disso separado.
  *
- * Enviar exige que todos tenham respondido. Meio convite respondido é pior
- * do que nenhum: o casal não sabe se o silêncio é "não vem" ou "esqueceu".
+ * Cada resposta vale sozinha. Já foi o contrário — o botão só ligava com o
+ * convite inteiro respondido, para o casal não confundir silêncio com "não
+ * vem". Só que o link do par cai no WhatsApp de uma pessoa, que responde
+ * sozinha: a Sara tocou em "Aceito", o botão continuou morto dizendo "falta
+ * responder por 1", e ela saiu achando que tinha confirmado. Perder a
+ * resposta é muito pior do que recebê-la pela metade — quem falta continua
+ * pendente no painel, que é exatamente a informação que se queria proteger.
  *
  * Já teve pergunta de carona e de restrição alimentar aqui. As duas saíram: a
  * tela existe para uma pergunta só — você vem? — e cada campo a mais é uma
@@ -45,8 +51,9 @@ export default function FormularioRsvp({
   const [erro, setErro] = useState<string | null>(null);
   const [pronto, setPronto] = useState(false);
 
-  const faltam = convidados.filter((c) => !respostas[c.id]).length;
-  const vem = convidados.filter((c) => respostas[c.id] === "vem").length;
+  const respondidas = convidados.filter((c) => respostas[c.id]);
+  const faltantes = convidados.filter((c) => !respostas[c.id]);
+  const vem = respondidas.filter((c) => respostas[c.id] === "vem").length;
 
   async function enviar() {
     setEnviando(true);
@@ -56,7 +63,9 @@ export default function FormularioRsvp({
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          respostas: convidados.map((c) => ({ id: c.id, status: respostas[c.id] })),
+          // Só quem respondeu. Mandar o outro com status vazio faria a API
+          // devolver "status inválido" e derrubaria a resposta boa junto.
+          respostas: respondidas.map((c) => ({ id: c.id, status: respostas[c.id] })),
         }),
       });
       if (!r.ok) {
@@ -89,6 +98,15 @@ export default function FormularioRsvp({
               ? "Já estamos comemorando aqui. A gente combina o resto pessoalmente — e se mudar alguma coisa, é só voltar neste link."
               : `Anotamos ${vem === 1 ? "uma presença" : `${vem} presenças`}. Se mudar alguma coisa, é só voltar neste link.`}
         </p>
+        {/* Quem falta fica dito por nome. Sem isso, quem respondeu sozinho sai
+            da tela achando que respondeu pelos dois. */}
+        {faltantes.length > 0 && (
+          <p className="texto">
+            {`Falta ${juntarNomes(faltantes.map((c) => c.nome))} — ${
+              faltantes.length === 1 ? "é só abrir" : "é só abrirem"
+            } este mesmo link e responder.`}
+          </p>
+        )}
         <button
           className="btn btn--linha"
           style={{ marginTop: "2rem" }}
@@ -146,17 +164,26 @@ export default function FormularioRsvp({
       <button
         className="btn btn--claro"
         style={{ marginTop: "2rem" }}
-        disabled={faltam > 0 || enviando}
+        disabled={respondidas.length === 0 || enviando}
         onClick={enviar}
       >
         {enviando
           ? "Salvando…"
-          : faltam === 0
-            ? "Confirmar"
-            : convidados.length === 1
+          : respondidas.length === 0
+            ? convidados.length === 1
               ? "Escolha uma das duas"
-              : `Falta responder por ${faltam}`}
+              : "Toque na sua resposta"
+            : faltantes.length === 0
+              ? "Confirmar"
+              : "Confirmar minha resposta"}
       </button>
+      {/* Dito antes de tocar, não depois: quem responde sozinho precisa saber
+          que está gravando só a sua parte. */}
+      {faltantes.length > 0 && respondidas.length > 0 && (
+        <p className="texto" style={{ marginTop: ".75rem", opacity: 0.7 }}>
+          {`${juntarNomes(faltantes.map((c) => c.nome))} pode responder depois, neste mesmo link.`}
+        </p>
+      )}
     </div>
   );
 }
