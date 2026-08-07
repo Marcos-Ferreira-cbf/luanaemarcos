@@ -63,7 +63,8 @@ E removê-la depois. O `/api/saude` continua consultando o banco: sem hibernaç�
 | Imagem | `ghcr.io/marcos-ferreira-cbf/luanaemarcos` — **pacote público** |
 | Identidade do CI | `gh-casamento`, appId `11fb7866-36f2-4390-9c87-f6f9e5b3c4e5` |
 | Zona DNS | `marcoseluana.social.br` no grupo `BTS_DNS`, delegada e resolvendo |
-| Falta | certificado gerenciado sair de `Pending`, 4 secrets no GitHub |
+| Domínio | apex e `www` em `SniEnabled`, os dois certificados `Succeeded` |
+| Deploy | `deploy.yml` verde de ponta a ponta, com a revisão subindo sozinha |
 
 O pacote no GHCR é público de propósito: o repositório já é, e a imagem não
 carrega segredo nenhum — tudo entra por env em tempo de execução. Pull anônimo
@@ -88,8 +89,36 @@ pwsh infra/subir.ps1 -Imagem ghcr.io/marcos-ferreira-cbf/luanaemarcos:<sha>
 **3. Banco** — rodar `db/schema.sql` e `db/seed.sql` contra o servidor criado.
 
 **4. Identidade federada para o CI** — feito. O App Registration `gh-casamento`
-tem Contributor no grupo e uma credencial federada para `refs/heads/main`, então
+tem Contributor no grupo e credencial federada para `refs/heads/main`, então
 o push loga no Azure sem senha nenhuma no repositório.
+
+**São duas credenciais, e a segunda não é redundância.** O GitHub passou a
+emitir o token OIDC com o *subject imutável*, que embute o id numérico do dono
+e o do repositório:
+
+```
+repo:Marcos-Ferreira-cbf@245021564/luanaemarcos@1324395079:ref:refs/heads/main
+```
+
+Ele faz isso para o token sobreviver a renomear conta ou repositório. Mas o
+Entra compara o subject como texto puro, então a credencial cadastrada no
+formato antigo — só com os nomes — simplesmente não casa, e o `azure/login`
+morre com `AADSTS700213: No matching federated identity record found`. A
+mensagem cita "Subject, Audience and Issuer" como se os três fossem suspeitos;
+os três estavam certos, o subject é que mudou de forma debaixo da gente.
+
+Isso custou um dia inteiro de runs vermelhas, e o diagnóstico foi difícil
+porque coincidiu com uma queda real do Actions: das 14h em diante os jobs nem
+recebiam máquina, o que escondeu o erro verdadeiro atrás de um sintoma
+parecido. O jeito de separar os dois é o campo `runner_name` do job — vazio
+significa que o job nunca rodou, e aí o problema não é seu:
+
+```
+gh api repos/<dono>/<repo>/actions/runs/<id>/jobs --jq '.jobs[].runner_name'
+```
+
+As duas credenciais ficam cadastradas de propósito, `main` e `main-imutavel`.
+Não custa nada, e cobre o formato antigo caso o GitHub recue.
 
 **5. Secrets no GitHub** — em *Settings → Secrets and variables → Actions*:
 
@@ -102,7 +131,12 @@ o push loga no Azure sem senha nenhuma no repositório.
 
 São só esses quatro, e já estão cadastrados. `DATABASE_URL` e os segredos do Mercado Pago vivem nos secrets do Container App, montados pelo Bicep — o workflow só troca a imagem, então não precisa vê-los.
 
-Enquanto eles não existiam, toda run terminava vermelha no passo *Login no Azure*. Vale saber ler esse vermelho: o build e o push da imagem acontecem **antes** do login, então a imagem ficava publicada no GHCR mesmo com a run falhando, e o `az containerapp update` era feito na mão. Run vermelha não significa, necessariamente, imagem ausente.
+Enquanto eles não existiam, toda run terminava vermelha no passo *Login no Azure* — o mesmo passo que depois falhou pelo subject imutável, por motivo diferente. Vale saber ler esse vermelho: o build e o push da imagem acontecem **antes** do login, então a imagem fica publicada no GHCR mesmo com a run falhando. Run vermelha não significa, necessariamente, imagem ausente — e quando só o login quebra, dá para pôr no ar com um comando, sem inventar caminho paralelo:
+
+```powershell
+az containerapp update -g rg-casamento-luanaemarcos -n ca-casamento `
+  --image ghcr.io/marcos-ferreira-cbf/luanaemarcos:<sha>
+```
 
 **6. Domínio** — a zona `marcoseluana.social.br` está no Azure DNS (grupo
 `BTS_DNS`) e o registro.br já delegou para `ns1-08.azure-dns.com` e companhia.
